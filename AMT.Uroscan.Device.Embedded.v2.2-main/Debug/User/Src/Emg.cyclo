@@ -1,0 +1,13 @@
+../User/Src/Emg.cpp:18:1:Emg::Emg()	1
+../User/Src/Emg.cpp:23:1:Emg::~Emg()	1
+../User/Src/Emg.cpp:23:1:virtual Emg::~Emg()	1
+../User/Src/Emg.cpp:26:6:void Emg::FirstEmgRead(bool)	2
+../User/Src/Emg.cpp:51:6:void Emg::SecondEmgRead(bool)	2
+../User/Src/Emg.cpp:75:6:void Emg::FirstEmgSetup()	1
+../User/Src/Emg.cpp:83:6:void Emg::SecondEmgSetup()	1
+../User/Src/Emg.cpp:92:6:void Emg::FirstEmgWriteToSPI(uint16_t, uint16_t)	1
+../User/Src/Emg.cpp:101:6:void Emg::SecondEmgWriteToSPI(uint16_t, uint16_t)	1
+../User/Src/Emg.cpp:110:6:void Emg::FirstEmgReadFromSPI(uint8_t)	1
+../User/Src/Emg.cpp:117:6:void Emg::SecondEmgReadFromSPI(uint8_t)	1
+../User/Src/Emg.cpp:124:10:uint32_t Emg::FirstEmgMovingAverageFilter(uint32_t)	7
+../User/Src/Emg.cpp:147:10:uint32_t Emg::SecondEmgMovingAverageFilter(uint32_t)	7

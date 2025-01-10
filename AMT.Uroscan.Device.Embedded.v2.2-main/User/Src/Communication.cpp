@@ -1,0 +1,552 @@
+/*
+ * Communication.cpp
+ *
+ *  Created on: Aug 6, 2024
+ *      Author: OrioN
+ */
+
+#include "../Inc/GeneralHeaders.h"
+
+Communication::Communication() {
+	// TODO Auto-generated constructor stub
+	FMI.BackupData();
+
+}
+
+Communication::~Communication() {
+	// TODO Auto-generated destructor stub
+}
+
+void Communication::ProcessCommand(uint8_t *command){
+
+	switch(command[0]){
+	case RequestType::R_System:
+		System(command);
+		break;
+	case RequestType::R_Command:
+		Command(command);
+		break;
+	case RequestType::R_Configuration:
+		Configuration(command);
+		break;
+	default:
+		ErrorResult(OperationCodes::ReadData, Errors::UndefinedProcessType);
+		break;
+
+	}
+}
+void Communication::System(uint8_t *command){
+
+	if(command[0]!=RequestType::R_System) return;
+	uint16_t calibrationWeight = 500;
+	uint16_t calibrationFlow = 12;
+   	uint8_t data[11];
+	switch (command[1])   										      //Check Function
+	{
+	   case SystemRequestType::SYSR_Status:
+		   	data[0]=Statuses.FirstEmg;
+		   	data[1]=Statuses.SecondEmg;
+		   	data[2]=Statuses.Volume;
+		   	data[3]=Statuses.Flow;
+		   	data[4]=Statuses.Pump;
+		   	data[5]=Statuses.Valve;
+		   	data[6]=ThreadStorage.LoadcellAverageThreadId!=NULL&&ThreadStorage.FirstEmgThreadId!=0x00;
+		   	data[7]=ThreadStorage.CalibrationVolumeThreadId!=NULL&&ThreadStorage.FirstEmgThreadId!=0x00;
+		   	data[8]=ThreadStorage.CalibrationFlowThreadId!=NULL&&ThreadStorage.FirstEmgThreadId!=0x00;
+		   	data[9]=ThreadStorage.CleanThreadId!=NULL&&ThreadStorage.FirstEmgThreadId!=0x00;
+		   	data[10]=Statuses.SafeMode;
+		   	SuccessDataResult(100,SuccessDataType::SD_Status,data,11);
+			break;
+	   case SystemRequestType::SYSR_Restart:
+		   	SuccessResult();
+		    HAL_NVIC_SystemReset();
+	        break;
+	   case SystemRequestType::SYSR_FactoryReset:
+		   	SuccessResult();
+		   HardReset();
+		   break;
+	   case SystemRequestType::SYSR_MeasurementAverage:
+		   	 ClearLoadcellParams();
+		   	 LoadcellAverage();
+		   	 break;
+	   case SystemRequestType::SYSR_CalibrationVolume:
+		   	 ClearLoadcellParams();
+			calibrationWeight=(command[2]<<8)+command[3];
+		   	 LoadcellVolumeCalibration(calibrationWeight);
+		   	 break;
+	   case SystemRequestType::SYSR_CalibrationFlow:
+		   	 ClearLoadcellParams();
+			calibrationFlow=(command[2]<<8)+command[3];
+		   	 LoadcellFlowCalibration(calibrationFlow);
+		   	 break;
+		default:
+			ErrorResult(OperationCodes::ReadData, Errors::UndefinedSystemType);
+			break;
+	 }
+
+
+}
+
+void Communication::Command(uint8_t *command){
+
+	uint16_t cleanTime=0;
+	if(command[0]!=RequestType::R_Command) return;
+	switch (command[1])   												//Check Function
+	{
+		case CommandRequestType::CMDR_FirstEmg:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
+					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			 ToggleFirstEmg(command[2]==1);  	     //Check SubFunction
+			 SuccessResult();
+			 break;
+		case CommandRequestType::CMDR_SecondEmg:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
+					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			ToggleSecondEmg(command[2]==1);    	 //Check SubFunction
+			 SuccessResult();
+			 break;
+		case CommandRequestType::CMDR_LoadcellMeasure:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
+					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			if(SystemConfig.VolumeAverage==0 || SystemConfig.FlowAverage==0){
+				ErrorResult(OperationCodes::ReadData, Errors::HasNotAverage);
+				return;
+			}
+			if(SystemConfig.FlowRate<2 || SystemConfig.VolumeRate<2){
+				ErrorResult(OperationCodes::ReadData, Errors::HasNotCalibration);
+				return;
+			}
+			 ToggleLoadCell(command[2]==1);
+			 SuccessResult();
+			 break;
+		case CommandRequestType::CMDR_Pump:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
+					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			TogglePump(command[2]==1); 	 	 //Check SubFunction
+			 SuccessResult();
+			 break;
+		case CommandRequestType::CMDR_Valve:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
+					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			ToggleValve(command[2]==1);   	 //Check SubFunction
+			 SuccessResult();
+			 break;
+		case CommandRequestType::CMDR_Clean: //Check SubFunction
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			 cleanTime=(command[2]<<8)+command[3];
+			if(cleanTime<1){
+				ErrorResult(OperationCodes::ReadData, Errors::ValueShouldNotBeZero);
+				return;
+			}
+			 StartClean(cleanTime*1000);
+			 break;
+		case CommandRequestType::CMDR_Safe: //Check SubFunction
+				if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+					ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+					return;
+				}
+				ToggleSafeMode(command[2]==1);
+				 SuccessResult();
+			 break;
+		case CommandRequestType::CMDR_DataStream:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			ToggleDataStream(command[2]==1);
+			 break;
+		case CommandRequestType::CMDR_ReadVolume:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
+					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			if(SystemConfig.VolumeAverage==0 || SystemConfig.FlowAverage==0){
+				ErrorResult(OperationCodes::ReadData, Errors::HasNotAverage);
+				return;
+			}
+			 ToggleReadVolume(command[2]==1);
+			 break;
+		case CommandRequestType::CMDR_ReadFlow:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
+					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			if(SystemConfig.FlowRate<2 || SystemConfig.VolumeRate<2){
+				ErrorResult(OperationCodes::ReadData, Errors::HasNotCalibration);
+				return;
+			}
+			 ToggleReadFlow(command[2]==1);
+			 break;
+		case CommandRequestType::CMDR_ReadFirstEmg:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
+					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			 ToggleReadFirstEmg(command[2]==1);
+			 break;
+		case CommandRequestType::CMDR_ReadSecondEmg:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
+					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			 ToggleReadSecondEmg(command[2]==1);
+			 break;
+		case CommandRequestType::CMDR_StopTest:
+			 cleanTime=(command[2]<<8)+command[3];
+			StopTest(cleanTime);
+			 break;
+		case CommandRequestType::CMDR_StartTest:
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				return;
+			}
+			if(SystemConfig.VolumeAverage==0 || SystemConfig.FlowAverage==0){
+				ErrorResult(OperationCodes::ReadData, Errors::HasNotAverage);
+				return;
+			}
+			if(SystemConfig.FlowRate<2 || SystemConfig.VolumeRate<2){
+				ErrorResult(OperationCodes::ReadData, Errors::HasNotCalibration);
+				return;
+			}
+			 cleanTime=(command[5]<<8)+command[6];
+			StartTest(command[2]==1, command[3]==1, command[4]==1,cleanTime);
+			 break;
+		default:
+			ErrorResult(OperationCodes::ReadData, Errors::UndefinedCommandType);
+			 break;
+	}
+}
+
+void Communication::Configuration(uint8_t *command){
+	if(command[0]!=RequestType::R_Configuration) return;
+	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	uint16_t maxTrim = 0;
+	uint16_t zeroPointMaxTrim = 0;
+	uint16_t zeroPointMinTrim = 0;
+	switch (command[1])   												//Check Function
+	{
+	case ConfigurationRequestType::CFGR_ReadConfiguration:
+		 SuccessDataResult(100,SuccessDataType::SD_Configuration, SystemConfig.Backup,SystemConfig.BackupLen);
+		 break;
+	case ConfigurationRequestType::CFGR_SetSendPerSecond:
+		FMI.WriteSendPerSecond(command[2]);
+		 SuccessResult();
+		 break;
+		case ConfigurationRequestType::CFGR_SetFirstEmgPerSecond:
+			FMI.WriteFirstEmgPerSecond(command[2]);
+			 SuccessResult();
+			 break;
+		case ConfigurationRequestType::CFGR_SetSecondEmgPerSecond:
+			FMI.WriteSecondEmgPerSecond(command[2]);
+			 SuccessResult();
+			 break;
+		case ConfigurationRequestType::CFGR_SetVolumePerSecond:
+			FMI.WriteVolumePerSecond(command[2]);
+			 SuccessResult();
+			 break;
+		case ConfigurationRequestType::CFGR_SetFlowPerSecond:
+			FMI.WriteFlowPerSecond(command[2]);
+			 SuccessResult();
+			 break;
+		case ConfigurationRequestType::CFGR_SetPumpMaxRunTime:
+			FMI.WritePumpMaxRunTime(command[2]);
+			 SuccessResult();
+			 break;
+		case ConfigurationRequestType::CFGR_SetValveMaxRunTime:
+			FMI.WriteValveMaxRunTime(command[2]);
+			 SuccessResult();
+			 break;
+		 case ConfigurationRequestType::CFGR_SetCalibrationFirstEmg:
+				maxTrim=(command[2]<<8)+command[3];
+				zeroPointMaxTrim=(command[4]<<8)+command[5];
+				zeroPointMinTrim=(command[6]<<8)+command[7];
+				if(maxTrim<1){
+					ErrorResult(OperationCodes::ReadData, Errors::ValueShouldNotBeZero);
+					return;
+				}
+				if(zeroPointMinTrim>=zeroPointMaxTrim){
+					ErrorResult(OperationCodes::ReadData, Errors::MinValueCanNotBeGreaterThanMaxValue);
+					return;
+				}
+				FMI.WriteFirstEmgData(maxTrim, zeroPointMaxTrim, zeroPointMinTrim);
+			 SuccessResult();
+			 break;
+		case ConfigurationRequestType::CFGR_SetCalibrationSecondEmg:
+			maxTrim=(command[2]<<8)+command[3];
+			zeroPointMaxTrim=(command[4]<<8)+command[5];
+			zeroPointMinTrim=(command[6]<<8)+command[7];
+			if(maxTrim<1){
+				ErrorResult(OperationCodes::ReadData, Errors::ValueShouldNotBeZero);
+				return;
+			}
+			if(zeroPointMinTrim>=zeroPointMaxTrim){
+				ErrorResult(OperationCodes::ReadData, Errors::MinValueCanNotBeGreaterThanMaxValue);
+				return;
+			}
+			FMI.WriteSecondEmgData(maxTrim, zeroPointMaxTrim, zeroPointMinTrim);
+			 SuccessResult();
+			 break;
+		case ConfigurationRequestType::CFGR_SaveFlash:
+			FMI.Update();
+			FlashInitialize();
+			 SuccessResult();
+			break;
+		default:
+			ErrorResult(OperationCodes::ReadData, Errors::UndefinedConfigurationType);
+			 break;
+	}
+}
+
+void Communication::ToggleFirstEmg(bool isStart){
+	Statuses.FirstEmg=isStart;
+	if(isStart){
+		if(ThreadStorage.FirstEmgThreadId!=NULL) return;
+		ThreadStorage.FirstEmgThreadId = osThreadNew(StartFirstEmgTask, NULL, &ThreadStorage.FirstEmgThreadAttr);
+		return;
+	}
+	osThreadTerminate(ThreadStorage.FirstEmgThreadId);
+	ThreadStorage.FirstEmgThreadId=NULL;
+}
+void Communication::ToggleSecondEmg(bool isStart){
+	Statuses.SecondEmg=isStart;
+	if(isStart){
+		if(ThreadStorage.SecondEmgThreadId!=NULL) return;
+		ThreadStorage.SecondEmgThreadId = osThreadNew(StartSecondEmgTask, NULL, &ThreadStorage.SecondEmgThreadAttr);
+		return;
+	}
+	osThreadTerminate(ThreadStorage.SecondEmgThreadId);
+	ThreadStorage.SecondEmgThreadId=NULL;
+}
+void Communication::ToggleLoadCell(bool isStart){
+	Statuses.Volume=isStart;
+	Statuses.Flow=isStart;
+	if(SystemConfig.systemMode==SystemModes::SafeMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	if(isStart){
+		if(ThreadStorage.FlowThreadId!=NULL) return;
+		if(ThreadStorage.VolumeThreadId!=NULL) return;
+		ClearLoadcellParams();
+		ThreadStorage.VolumeThreadId = osThreadNew(StartVolumeTask, NULL, &ThreadStorage.VolumeThreadAttr);
+		ThreadStorage.FlowThreadId = osThreadNew(StartFlowTask, NULL, &ThreadStorage.FlowThreadAttr);
+		return;
+	}
+	osThreadTerminate(ThreadStorage.VolumeThreadId);
+	osThreadTerminate(ThreadStorage.FlowThreadId);
+	ThreadStorage.VolumeThreadId=NULL;
+	ThreadStorage.FlowThreadId=NULL;
+}
+void Communication::ToggleReadVolume(bool isStart){
+	if(SystemConfig.systemMode==SystemModes::SafeMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	if(isStart){
+		if(ThreadStorage.ReadVolumeThreadId!=NULL) return;
+		ClearLoadcellParams();
+		ThreadStorage.ReadVolumeThreadId = osThreadNew(StartReadVolumeTask, NULL, &ThreadStorage.VolumeThreadAttr);
+		return;
+	}
+	osThreadTerminate(ThreadStorage.ReadVolumeThreadId);
+	ThreadStorage.ReadVolumeThreadId=NULL;
+	ClearLoadcellParams();
+}
+
+void Communication::ToggleReadFlow(bool isStart){
+	if(SystemConfig.systemMode==SystemModes::SafeMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	if(isStart){
+		if(ThreadStorage.ReadFlowThreadId!=NULL) return;
+		ClearLoadcellParams();
+		ThreadStorage.ReadFlowThreadId = osThreadNew(StartReadFlowTask, NULL, &ThreadStorage.FlowThreadAttr);
+		return;
+	}
+	osThreadTerminate(ThreadStorage.ReadFlowThreadId);
+	ThreadStorage.ReadFlowThreadId=NULL;
+	ClearLoadcellParams();
+}
+
+void Communication::ToggleReadFirstEmg(bool isStart){
+	if(SystemConfig.systemMode==SystemModes::SafeMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	if(isStart){
+		if(ThreadStorage.ReadFirstEmgThreadId!=NULL) return;
+		ThreadStorage.ReadFirstEmgThreadId = osThreadNew(StartReadFirstEmgTask, NULL, &ThreadStorage.FlowThreadAttr);
+		return;
+	}
+	osThreadTerminate(ThreadStorage.ReadFirstEmgThreadId);
+	ThreadStorage.ReadFirstEmgThreadId=NULL;
+}
+
+void Communication::ToggleReadSecondEmg(bool isStart){
+	if(SystemConfig.systemMode==SystemModes::SafeMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	if(isStart){
+		if(ThreadStorage.ReadSecondEmgThreadId!=NULL) return;
+		ThreadStorage.ReadSecondEmgThreadId = osThreadNew(StartReadSecondEmgTask, NULL, &ThreadStorage.FlowThreadAttr);
+		return;
+	}
+	osThreadTerminate(ThreadStorage.ReadSecondEmgThreadId);
+	ThreadStorage.ReadSecondEmgThreadId=NULL;
+}
+
+void Communication::TogglePump(bool isStart){
+	Statuses.Pump=isStart;
+	if(isStart){
+		if(ThreadStorage.PumpMaxRunThreadId!=NULL) return;
+		HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_SET);
+		ThreadStorage.PumpMaxRunThreadId = osThreadNew(StartAutoClosePumpTask, NULL, &ThreadStorage.PumpMaxRunThreadAttr);
+		return;
+	}
+	HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_RESET);
+	osThreadTerminate(ThreadStorage.PumpMaxRunThreadId);
+	ThreadStorage.PumpMaxRunThreadId=NULL;
+
+}
+
+void Communication::ToggleValve(bool isStart){
+	Statuses.Valve=isStart;
+	if(isStart){
+		if(ThreadStorage.ValveMaxRunThreadId!=NULL) return;
+		HAL_GPIO_WritePin(VALVE_GPIO_Port, VALVE_Pin, GPIO_PIN_SET);
+		ThreadStorage.ValveMaxRunThreadId = osThreadNew(StartAutoCloseValveTask, NULL, &ThreadStorage.ValveMaxRunThreadAttr);
+		return;
+	}
+	HAL_GPIO_WritePin(VALVE_GPIO_Port, VALVE_Pin, GPIO_PIN_RESET);
+	osThreadTerminate(ThreadStorage.ValveMaxRunThreadId);
+	ThreadStorage.ValveMaxRunThreadId=NULL;
+}
+void Communication::ToggleDataStream(bool isStart){
+	if(SystemConfig.systemMode!=SystemModes::EmptyMode && SystemConfig.systemMode!=SystemModes::TestMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	SystemConfig.IsStartTest=isStart;
+	if(isStart){
+		SystemConfig.StartTestTime=StartTimerTicks;
+		SystemConfig.systemMode=SystemModes::TestMode;
+		return;
+	}
+	SystemConfig.systemMode=SystemModes::EmptyMode;
+}
+void Communication::StartTest(bool isStartFirstEmg,bool isStartSecondEmg,bool isStartLoadcell,uint16_t cleanTime){
+
+	SystemConfig.CleanTime=cleanTime;
+	StartCleanTask(NULL);
+	ToggleFirstEmg(isStartFirstEmg);
+	ToggleSecondEmg(isStartSecondEmg);
+	ToggleLoadCell(isStartLoadcell);
+	ToggleDataStream(true);
+	SystemConfig.PocketIndex=0;
+	SystemConfig.systemMode=SystemModes::TestMode;
+}
+void Communication::StopTest(uint16_t cleanTime){
+	SystemConfig.CleanTime=cleanTime;
+	ToggleDataStream(false);
+	ToggleFirstEmg(false);
+	ToggleSecondEmg(false);
+	StartCleanTask(NULL);
+	ToggleLoadCell(false);
+	SystemConfig.PocketIndex=0;
+	SystemConfig.systemMode=SystemModes::EmptyMode;
+    HAL_NVIC_SystemReset();
+}
+
+void Communication::StartClean(uint16_t cleanTime){
+	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	SystemConfig.systemMode=SystemModes::CleanMode;
+	if(ThreadStorage.CleanThreadId==NULL){
+		SystemConfig.CleanTime=cleanTime;
+		ThreadStorage.CleanThreadId = osThreadNew(StartCleanTask, NULL, &ThreadStorage.CleanThreadAttr);
+		return;
+	}
+}
+
+void Communication::ToggleSafeMode(bool isStart){
+
+	Statuses.SafeMode=isStart;
+	if(SystemConfig.systemMode!=SystemModes::EmptyMode && SystemConfig.systemMode!=SystemModes::SafeMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	if(isStart){
+		if(ThreadStorage.SafeModeThreadId!=NULL)return;
+		SystemConfig.systemMode=SystemModes::SafeMode;
+		ThreadStorage.SafeModeThreadId = osThreadNew(StartSafeModeTask, NULL, &ThreadStorage.SafeModeThreadAttr);
+		return;
+	}
+	SystemConfig.systemMode=SystemModes::EmptyMode;
+	osThreadTerminate(ThreadStorage.SafeModeThreadId);
+	ThreadStorage.SafeModeThreadId=NULL;
+}
+
+void Communication::LoadcellAverage(){
+	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	SystemConfig.systemMode=SystemModes::CalibrationMode;
+	ThreadStorage.LoadcellAverageThreadId = osThreadNew(StartLoadcellAverageTask, NULL, &ThreadStorage.LoadcellAverageThreadAttr);
+}
+
+void Communication::LoadcellVolumeCalibration(uint16_t weight){
+	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	SystemConfig.systemMode=SystemModes::CalibrationMode;
+	SystemConfig.VolumeRate=1;
+	SystemConfig.CalibrationWeight=weight;
+	ThreadStorage.CalibrationVolumeThreadId = osThreadNew(StartCalibrationVolumeTask, NULL, &ThreadStorage.CalibrationVolumeThreadAttr);
+}
+
+void Communication::LoadcellFlowCalibration(uint16_t flow){
+	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		return;
+	}
+	SystemConfig.systemMode=SystemModes::CalibrationMode;
+	SystemConfig.FlowRate=1;
+	SystemConfig.CalibrationFlow=flow;
+	ThreadStorage.CalibrationFlowThreadId = osThreadNew(StartCalibrationFlowTask, NULL, &ThreadStorage.CalibrationFlowThreadAttr);
+}
+
+void Communication::SetFlashManager(FlashManager flashManager){
+	FMI=flashManager;
+}
+
