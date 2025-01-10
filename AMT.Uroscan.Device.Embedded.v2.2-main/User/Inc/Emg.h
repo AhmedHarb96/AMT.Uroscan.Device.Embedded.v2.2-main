@@ -50,7 +50,9 @@ public:
 	uint32_t ReadSecondEmgValueArray[3];
 	uint8_t  FirstEmgReadSPIValue[1];
 	uint8_t  SecondEmgReadSPIValue[1];
+	uint32_t NonFilterFirstEmg;
 	uint32_t FirstEmgValue;
+	uint32_t NonFilterSecondEmg;
 	uint32_t SecondEmgValue;
 	uint32_t FirstEmgBuffer[1024];
 	uint32_t SecondEmgBuffer[1024];

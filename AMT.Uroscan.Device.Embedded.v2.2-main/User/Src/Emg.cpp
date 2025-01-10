@@ -35,7 +35,7 @@ void Emg::FirstEmgRead(bool useBuffer){
 	ReadFirstEmgValueArray[2] = FirstEmgReadSPIValue[0];
 
 	FirstEmgValue = (ReadFirstEmgValueArray[1] + (ReadFirstEmgValueArray[0] << 8));
-	Debugger.NonFilterFirstEmg=FirstEmgValue;
+	NonFilterFirstEmg=FirstEmgValue;
 	uint32_t filteredValue = FirstEmgMovingAverageFilter(FirstEmgValue);
 	Debugger.FirstEmg=filteredValue;
 	FirstEmgValue=filteredValue;
@@ -59,7 +59,7 @@ void Emg::SecondEmgRead(bool useBuffer){
 	ReadSecondEmgValueArray[2] = SecondEmgReadSPIValue[0];
 
 	SecondEmgValue = (ReadSecondEmgValueArray[1] + (ReadSecondEmgValueArray[0] << 8));
-	Debugger.NonFilterSecondEmg=SecondEmgValue;
+	NonFilterSecondEmg=SecondEmgValue;
 	uint32_t filteredValue = SecondEmgMovingAverageFilter(SecondEmgValue);
 	Debugger.SecondEmg=filteredValue;
 	SecondEmgValue=filteredValue;

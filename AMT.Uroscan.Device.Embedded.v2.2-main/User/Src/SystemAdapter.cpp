@@ -95,8 +95,18 @@ void StartOS(void){
 		LoadCellInstance.ReadFlow(false);
 	}
 	*/
+	HAL_Delay( 1000 );
+   	uint8_t data[4];
+   	data[0]=HasCalibration();//HasCalibration
+   	data[1]=HasLoadcell();//HasLoadcell
+   	data[2]=HasFirstEmg();//HasFirstEmg
+   	data[3]=HasSecondEmg();//HasSecondEmg
+	SuccessDataResult(0, SuccessDataType::SD_Start, data, 4);
+
 	ThreadStorage.ReadUARTThreadId=osThreadNew(StartReadUARTTask, NULL, &normalPriority);
 	osKernelStart();
+	SuccessDataResult(0, SuccessDataType::SD_Stop, {}, 0);
+    HAL_NVIC_SystemReset();
 }
 
 void HardReset(void){
@@ -196,9 +206,6 @@ void StartReadUARTTask(void *argument){
 	ThreadStorage.CommunicationSemaphoreHandle = osSemaphoreNew(1, 1, &communicationSemaphore_attributes);
 	ThreadStorage.SendUARTThreadId=osThreadNew(StartSendUARTTask, NULL, &normalPriority);
 	bool retryStatus=false;
-	uint8_t *sData;
-	sData=(uint8_t*)0xFF;
-	SuccessDataResult(100,SuccessDataType::SD_Start,sData,1);
 	for(;;){
 		if (retryStatus||HAL_UART_Receive_DMA(&huart1, CommandUart, 8) == HAL_OK)   //100
 		{
@@ -897,4 +904,35 @@ void ClearLoadcellParams(){
 }
 FlashManager GetFlashManager(){
 	return FlashManagerInstance;
+}
+uint8_t HasCalibration(void){
+
+	if(SystemConfig.FlowRate<2 || SystemConfig.VolumeRate<2){
+		return 0;
+	}
+	return 1;
+}
+uint8_t HasLoadcell(void){
+
+	LoadCellInstance.ReadVolumeAndFlow();
+	if(LoadCellInstance.VolumeValue==1310680){
+		return 0;
+	}
+	return 1;
+}
+uint8_t HasFirstEmg(void){
+
+	EmgInstance.FirstEmgRead(false);
+	if(EmgInstance.NonFilterFirstEmg==65535||EmgInstance.NonFilterFirstEmg==0){
+		return 0;
+	}
+	return 1;
+}
+uint8_t HasSecondEmg(void){
+
+	EmgInstance.SecondEmgRead(false);
+	if(EmgInstance.NonFilterSecondEmg==65535||EmgInstance.NonFilterSecondEmg==0){
+		return 0;
+	}
+	return 1;
 }

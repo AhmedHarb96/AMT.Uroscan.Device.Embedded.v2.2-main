@@ -193,6 +193,7 @@ enum SuccessDataType{
 	SD_FlowCalibration=0x09,
 	SD_FirstEmg=0x0A,
 	SD_SecondEmg=0x0B,
+	SD_Stop=0xFE,
 	SD_Start=0xFF,
 
 };

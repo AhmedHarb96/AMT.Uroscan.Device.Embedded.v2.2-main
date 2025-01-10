@@ -46,6 +46,10 @@ void StartCalibrationFlowTask(void *argument);
 void StartCleanTask(void *argument);
 void StartSafeModeTask(void *argument);
 void ClearLoadcellParams();
+uint8_t HasCalibration(void);
+uint8_t HasLoadcell(void);
+uint8_t HasFirstEmg(void);
+uint8_t HasSecondEmg(void);
 
 #ifdef __cplusplus
 }
