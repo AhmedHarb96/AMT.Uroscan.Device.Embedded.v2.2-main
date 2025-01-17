@@ -25,7 +25,7 @@ public:
 	void ConfigValve(uint16_t timeout);
 	void ToggleDataStream(bool isStart);
 	void StartClean(uint16_t cleanTime);
-	void StartTest(bool isStartFirstEmg,bool isStartSecondEmg,bool isStartLoadcell,uint16_t cleanTime);
+	void StartTest(bool isStartFirstEmg, bool isStartSecondEmg, bool isStartLoadcell, uint16_t cleanTime, uint8_t startHandleSeconds);
 	void ToggleReadVolume(bool isStart);
 	void ToggleReadFlow(bool isStart);
 	void ToggleReadFirstEmg(bool isStart);

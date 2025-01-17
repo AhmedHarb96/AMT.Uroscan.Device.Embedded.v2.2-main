@@ -36,6 +36,7 @@ void Emg::FirstEmgRead(bool useBuffer){
 
 	FirstEmgValue = (ReadFirstEmgValueArray[1] + (ReadFirstEmgValueArray[0] << 8));
 	NonFilterFirstEmg=FirstEmgValue;
+
 	uint32_t filteredValue = FirstEmgMovingAverageFilter(FirstEmgValue);
 	Debugger.FirstEmg=filteredValue;
 	FirstEmgValue=filteredValue;
@@ -138,7 +139,7 @@ uint32_t Emg::FirstEmgMovingAverageFilter(uint32_t newSample){
 	if(newVal>SystemConfig.FirstEmgMaxTrim){
 		return LastFirstEmg;
 	}
-	newVal=(LastFirstEmg*99.5+newVal*0.5)/100;  //newVal=(LastFirstEmg*990+newVal*10)/1000;
+	newVal=(LastFirstEmg*90+newVal*10)/100;  //newVal=(LastFirstEmg*990+newVal*10)/1000;
 	LastFirstEmg=newVal;
 	newVal=newVal-50; //250
 	if(newVal>=66000) newVal=0;
@@ -160,9 +161,9 @@ uint32_t Emg::SecondEmgMovingAverageFilter(uint32_t newSample){
 	if(newVal>SystemConfig.SecondEmgMaxTrim){
 		return LastSecondEmg;
 	}
-	newVal=(LastSecondEmg*99.5+newVal*0.5)/100;
+	newVal=(LastSecondEmg*90+newVal*10)/100;
 	LastSecondEmg=newVal;
-	newVal=newVal-50; //250
+	newVal=newVal-250; //250
 	if(newVal>=66000) newVal=0;
 	return newVal;
 }

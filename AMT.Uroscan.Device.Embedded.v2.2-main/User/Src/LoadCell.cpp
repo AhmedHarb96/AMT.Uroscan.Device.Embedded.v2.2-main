@@ -185,6 +185,10 @@ void LoadCell::ReadFlow(bool useBuffer){
 			+ (readLoadCellValue[0] << 8);
 	FlowValue=(65536-FlowValue);
 	float32_t newVal=CalculateRealFlowData(FlowValue);
+	if(newVal>=SystemConfig.MinimumFlowSensiblity){
+		IsFirstHandle=true;
+		LastHandleProcessTime=StartTimerTicks;
+	}
 	Debugger.Flow=newVal;
 	if(useBuffer==false) return;
 	FlowBufferLen%=1024;
@@ -230,16 +234,16 @@ float32_t LoadCell::CalculateRealFlowData(float32_t flow){
 }
 void LoadCell::ReadFromSPI(uint8_t value, int type){
 	HAL_GPIO_WritePin(SPI3_CS_GPIO_Port, SPI3_CS_Pin, GPIO_PIN_RESET);
-	HAL_SPI_Transmit_DMA(LOAD_CELL_SPI_CHANNEL, &value, 1);  //, 100
+	HAL_SPI_Transmit(LOAD_CELL_SPI_CHANNEL, &value, 1, 100);  //, 100
 	switch(type){
 		case LOAD_CELL_ALL:
-			HAL_SPI_Receive_DMA(LOAD_CELL_SPI_CHANNEL, &VolumeAndFlowReadSPIValue,1);  //, 100
+			HAL_SPI_Receive(LOAD_CELL_SPI_CHANNEL, &VolumeAndFlowReadSPIValue,1, 100);  //, 100
 		break;
 		case LOAD_CELL_VOLUME:
-			HAL_SPI_Receive_DMA(LOAD_CELL_SPI_CHANNEL, &VolumeReadSPIValue,1);  //, 100
+			HAL_SPI_Receive(LOAD_CELL_SPI_CHANNEL, &VolumeReadSPIValue,1, 100);  //, 100
 		break;
 		case LOAD_CELL_FLOW:
-			HAL_SPI_Receive_DMA(LOAD_CELL_SPI_CHANNEL, &FlowReadSPIValue,1);  //, 100
+			HAL_SPI_Receive(LOAD_CELL_SPI_CHANNEL, &FlowReadSPIValue,1, 100);  //, 100
 		break;
 		default:
 			break;
@@ -247,6 +251,8 @@ void LoadCell::ReadFromSPI(uint8_t value, int type){
 	HAL_GPIO_WritePin(SPI3_CS_GPIO_Port, SPI3_CS_Pin, GPIO_PIN_SET);
 }
 void LoadCell::ClearParams(void){
+	LastHandleProcessTime=UINT32_MAX;
+	IsFirstHandle=false;
 	VolumeValue=0;
 	FlowValue=0;
 	LastVolumeValue=0;

@@ -92,6 +92,8 @@ public:
 	volatile float32_t LastReadVolumeValue;
 	volatile float32_t LastFlowValue;
 	volatile float32_t LastVolumeValue;
+	volatile bool IsFirstHandle;
+	uint32_t LastHandleProcessTime;
 private:
 	uint8_t VolumeAndFlowReadSPIValue;
 	uint8_t VolumeReadSPIValue;

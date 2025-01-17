@@ -91,6 +91,9 @@ void Communication::Command(uint8_t *command){
 
 	uint16_t cleanTime=0;
 	if(command[0]!=RequestType::R_Command) return;
+    bool isOpenFirstEmg = command[2] & 0x04;
+    bool isOpenSecondEmg = command[2] & 0x02;
+    bool isOpenLoadcell = command[2] & 0x01;
 	switch (command[1])   												//Check Function
 	{
 		case CommandRequestType::CMDR_FirstEmg:
@@ -230,8 +233,10 @@ void Communication::Command(uint8_t *command){
 				ErrorResult(OperationCodes::ReadData, Errors::HasNotCalibration);
 				return;
 			}
-			 cleanTime=(command[5]<<8)+command[6];
-			StartTest(command[2]==1, command[3]==1, command[4]==1,cleanTime);
+			 cleanTime=(command[3]<<8)+command[4];
+			 SystemConfig.MinimumFlowSensiblity=command[5];
+			 SystemConfig.WaitAfterProcessSeconds=command[6];
+			StartTest(isOpenFirstEmg, isOpenSecondEmg, isOpenLoadcell,cleanTime,command[7]);
 			 break;
 		default:
 			ErrorResult(OperationCodes::ReadData, Errors::UndefinedCommandType);
@@ -250,13 +255,13 @@ void Communication::Configuration(uint8_t *command){
 	uint16_t zeroPointMinTrim = 0;
 	switch (command[1])   												//Check Function
 	{
-	case ConfigurationRequestType::CFGR_ReadConfiguration:
-		 SuccessDataResult(100,SuccessDataType::SD_Configuration, SystemConfig.Backup,SystemConfig.BackupLen);
-		 break;
-	case ConfigurationRequestType::CFGR_SetSendPerSecond:
-		FMI.WriteSendPerSecond(command[2]);
-		 SuccessResult();
-		 break;
+		case ConfigurationRequestType::CFGR_ReadConfiguration:
+			 SuccessDataResult(100,SuccessDataType::SD_Configuration, SystemConfig.Backup,SystemConfig.BackupLen);
+			 break;
+		case ConfigurationRequestType::CFGR_SetSendPerSecond:
+			FMI.WriteSendPerSecond(command[2]);
+			 SuccessResult();
+			 break;
 		case ConfigurationRequestType::CFGR_SetFirstEmgPerSecond:
 			FMI.WriteFirstEmgPerSecond(command[2]);
 			 SuccessResult();
@@ -461,13 +466,15 @@ void Communication::ToggleDataStream(bool isStart){
 	}
 	SystemConfig.systemMode=SystemModes::EmptyMode;
 }
-void Communication::StartTest(bool isStartFirstEmg,bool isStartSecondEmg,bool isStartLoadcell,uint16_t cleanTime){
+void Communication::StartTest(bool isStartFirstEmg,bool isStartSecondEmg,bool isStartLoadcell,uint16_t cleanTime,uint8_t startHandleSeconds){
 
 	SystemConfig.CleanTime=cleanTime;
 	StartCleanTask(NULL);
+	FixVolume();
 	ToggleFirstEmg(isStartFirstEmg);
 	ToggleSecondEmg(isStartSecondEmg);
 	ToggleLoadCell(isStartLoadcell);
+	SystemConfig.StartHandleSeconds=startHandleSeconds;
 	ToggleDataStream(true);
 	SystemConfig.PocketIndex=0;
 	SystemConfig.systemMode=SystemModes::TestMode;
@@ -477,8 +484,8 @@ void Communication::StopTest(uint16_t cleanTime){
 	ToggleDataStream(false);
 	ToggleFirstEmg(false);
 	ToggleSecondEmg(false);
-	StartCleanTask(NULL);
 	ToggleLoadCell(false);
+	StartCleanTask(NULL);
 	SystemConfig.PocketIndex=0;
 	SystemConfig.systemMode=SystemModes::EmptyMode;
     HAL_NVIC_SystemReset();

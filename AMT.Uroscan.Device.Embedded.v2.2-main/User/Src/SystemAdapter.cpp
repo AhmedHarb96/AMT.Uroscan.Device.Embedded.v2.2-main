@@ -62,7 +62,6 @@ void SetupOS(void){
 	LoadCellInstance.Setup();
 	FlashInitialize();
 	CommunicationInstance.SetFlashManager(FlashManagerInstance);
-
 	osKernelInitialize();
 }
 void UpdatePriority(void){
@@ -103,9 +102,8 @@ void StartOS(void){
    	data[3]=HasSecondEmg();//HasSecondEmg
 	SuccessDataResult(0, SuccessDataType::SD_Start, data, 4);
 
-	ThreadStorage.ReadUARTThreadId=osThreadNew(StartReadUARTTask, NULL, &normalPriority);
+	ThreadStorage.ReadUARTThreadId=osThreadNew(StartReadUARTTask, NULL, &highPriority);
 	osKernelStart();
-	SuccessDataResult(0, SuccessDataType::SD_Stop, {}, 0);
     HAL_NVIC_SystemReset();
 }
 
@@ -198,37 +196,55 @@ void ErrorResult(uint8_t opCode,uint16_t errorCode){
 	data[3]=errorCode & 0xFF;
 	WriteUart(data, 4);
 }
-
 void StartReadUARTTask(void *argument){
 
-	const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
-	osStatus_t communicationSemaphoreVal;
+	const TickType_t xDelay = 50 / portTICK_PERIOD_MS;  //300
+	//osStatus_t communicationSemaphoreVal;
 	ThreadStorage.CommunicationSemaphoreHandle = osSemaphoreNew(1, 1, &communicationSemaphore_attributes);
 	ThreadStorage.SendUARTThreadId=osThreadNew(StartSendUARTTask, NULL, &normalPriority);
-	bool retryStatus=false;
+	//bool retryStatus=false;
+    uint8_t data[8];
 	for(;;){
-		if (retryStatus||HAL_UART_Receive_DMA(&huart1, CommandUart, 8) == HAL_OK)   //100
-		{
-			retryStatus=false;
-			if(CommandUart[0]!=0){
-				communicationSemaphoreVal = osSemaphoreAcquire(ThreadStorage.CommunicationSemaphoreHandle, 1000);
-				if(communicationSemaphoreVal==osOK){
-					uint8_t data[8];
-					for (int i = 0; i < 8; ++i) {
-						data[i]=CommandUart[i];
-						CommandUart[i]=0;
-					}
-					CommunicationInstance.ProcessCommand(data);
-					osSemaphoreRelease(ThreadStorage.CommunicationSemaphoreHandle);
-					//osThreadTerminate(ThreadStorage.SendUARTThreadId);
-					//ThreadStorage.SendUARTThreadId=NULL;
-				}else{
-					retryStatus=true;
-				}
-
-			}
-		}
+		//uint16_t newPos = __HAL_DMA_GET_COUNTER(huart1.hdmarx);
+		//if(newPos>0){
+			HAL_StatusTypeDef status=HAL_UART_Receive_DMA(&huart1, data, 8);
+			if (status == HAL_OK&&(data[0]==1||data[0]==2||data[0]==3)) {
+				SuccessDataResult(100, SuccessDataType::SD_ProcessCommand, data, 8);
+				CommunicationInstance.ProcessCommand(data);
+	        }
+			else if(status != HAL_TIMEOUT && status != HAL_BUSY && status != HAL_OK){
+				SuccessDataResult(100, SuccessDataType::SD_RepeatAgain, data, 8);
+	        }
+		//}
 		vTaskDelay(xDelay);
+			/*if (retryStatus||HAL_UART_Receive(&huart1, CommandUart, 8,HAL_MAX_DELAY) == HAL_OK)   //100
+			{
+				retryStatus=false;
+				if(CommandUart[0]!=0){
+					communicationSemaphoreVal = osSemaphoreAcquire(ThreadStorage.CommunicationSemaphoreHandle, 1000);
+					if(communicationSemaphoreVal==osOK){
+						uint8_t data[8];
+						for (int i = 0; i < 8; ++i) {
+							data[i]=CommandUart[i];
+							CommandUart[i]=0;
+						}
+						CommunicationInstance.ProcessCommand(data);
+						osSemaphoreRelease(ThreadStorage.CommunicationSemaphoreHandle);
+						//osThreadTerminate(ThreadStorage.SendUARTThreadId);
+						//ThreadStorage.SendUARTThreadId=NULL;
+					}else{
+						retryStatus=true;
+					}
+
+				}
+				else{
+					uint16_t* len=&huart1.RxXferSize;
+					uint8_t xData[sizeof(len)];
+					HAL_UART_Receive(&huart1, xData, sizeof(len),HAL_MAX_DELAY);
+					SuccessDataResult(100, SuccessDataType::SD_RepeatAgain, xData, sizeof(len));
+				}
+			vTaskDelay(xDelay);
+		}*/
 	}
 }
 void WriteUart(uint8_t *data,int len){
@@ -357,30 +373,40 @@ void StartSendUARTTask(void *argument)
 		  }
 		  osSemaphoreRelease(ThreadStorage.FlowSemaphoreHandle);
 	  }
-	  	  if(totalLen>11){
-	  		  uint16_t len=totalLen-3;
-			  allData[0]=3;
-			  allData[1]=(len & 0xFF00)>>8;
-			  allData[2]=len & 0xFF;
-			  allData[3]=(SystemConfig.PocketIndex & 0xFF000000) >> 24;
-			  allData[4]=(SystemConfig.PocketIndex & 0x00FF0000) >> 16;
-			  allData[5]=(SystemConfig.PocketIndex & 0x0000FF00) >> 8;
-			  allData[6]=(SystemConfig.PocketIndex & 0x000000FF);
-			  uint32_t time=(StartTimerTicks-SystemConfig.StartTestTime)/10;
-			  allData[7]=(time & 0xFF000000) >> 24;
-			  allData[8]=(time & 0x00FF0000) >> 16;
-			  allData[9]=(time & 0x0000FF00) >> 8;
-			  allData[10]=(time & 0x000000FF);
-	  		  if(SystemConfig.IsStartTest){
-	  			  communicationSemaphoreVal = osSemaphoreAcquire(ThreadStorage.CommunicationSemaphoreHandle, 1000);
-	  			  if(communicationSemaphoreVal==osOK){
-	  	  			WriteUart(allData,totalLen);
-	  				  osSemaphoreRelease(ThreadStorage.CommunicationSemaphoreHandle);
-	  			  }
-	  		  }
-	  		SystemConfig.PocketIndex++;
-	  	  }
-  		  vTaskDelayUntil(&xLastWakeTime, xFrequency);
+	  if(totalLen>11){
+		  uint16_t len=totalLen-3;
+		  allData[0]=3;
+		  allData[1]=(len & 0xFF00)>>8;
+		  allData[2]=len & 0xFF;
+		  allData[3]=(SystemConfig.PocketIndex & 0xFF000000) >> 24;
+		  allData[4]=(SystemConfig.PocketIndex & 0x00FF0000) >> 16;
+		  allData[5]=(SystemConfig.PocketIndex & 0x0000FF00) >> 8;
+		  allData[6]=(SystemConfig.PocketIndex & 0x000000FF);
+		  uint32_t time=(StartTimerTicks-SystemConfig.StartTestTime)/10;
+		  allData[7]=(time & 0xFF000000) >> 24;
+		  allData[8]=(time & 0x00FF0000) >> 16;
+		  allData[9]=(time & 0x0000FF00) >> 8;
+		  allData[10]=(time & 0x000000FF);
+		  if(SystemConfig.IsStartTest){
+			  if(SystemConfig.StartHandleSeconds>0&&SystemConfig.StartHandleSeconds*1000<time&&LoadCellInstance.IsFirstHandle==false){
+					SystemConfig.IsInternalClean=true;
+				  CommunicationInstance.StopTest(5000);
+				continue;
+			  }
+			  if(SystemConfig.WaitAfterProcessSeconds>0&&SystemConfig.WaitAfterProcessSeconds*10000<StartTimerTicks-LoadCellInstance.LastHandleProcessTime&&LoadCellInstance.IsFirstHandle==true){
+				SystemConfig.IsInternalClean=true;
+				CommunicationInstance.StopTest(5000);
+				continue;
+			  }
+			  communicationSemaphoreVal = osSemaphoreAcquire(ThreadStorage.CommunicationSemaphoreHandle, 1000);
+			  if(communicationSemaphoreVal==osOK){
+				  WriteUart(allData,totalLen);
+				  osSemaphoreRelease(ThreadStorage.CommunicationSemaphoreHandle);
+			  }
+		  }
+		SystemConfig.PocketIndex++;
+	  }
+	  vTaskDelayUntil(&xLastWakeTime, xFrequency);
   }
   /* USER CODE END 5 */
 }
@@ -439,6 +465,7 @@ void StartReadFirstEmgTask(void *argument)
 			data[5]=emgArray[1];
 			data[6]=emgArray[2];
 			data[7]=emgArray[3];
+			//WriteUart(emgArray, 4);
 			SuccessDataResult(0, SuccessDataType::SD_FirstEmg, data, 8);
 			osSemaphoreRelease(ThreadStorage.FirstEmgSemaphoreHandle);
 		}
@@ -685,7 +712,7 @@ void StartAutoCloseValveTask(void *argument)
 }
 void StartLoadcellAverageTask(void *argument){
 
-	const TickType_t xDelay = 25 / portTICK_PERIOD_MS;
+	const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
 	float32_t sumFlow = 0;
 	float32_t sumVolume = 0;
 	uint16_t instanceCount=0;
@@ -819,8 +846,10 @@ void StartCleanTask(void *argument){
 	volatile uint8_t type=0;
 	LoadCellInstance.ClearSamples();
 	CommunicationInstance.TogglePump(true);
-	osThreadTerminate(ThreadStorage.PumpMaxRunThreadId);
-	ThreadStorage.PumpMaxRunThreadId=NULL;
+	if(ThreadStorage.PumpMaxRunThreadId!=NULL&&ThreadStorage.PumpMaxRunThreadId!=0x00){
+		osThreadTerminate(ThreadStorage.PumpMaxRunThreadId);
+		ThreadStorage.PumpMaxRunThreadId=NULL;
+	}
 	for(;;)
 	{
 		LoadCellInstance.ReadVolumeAndFlow();
@@ -836,10 +865,15 @@ void StartCleanTask(void *argument){
 			if(SystemConfig.VolumeAverage+10000>LoadCellInstance.VolumeValue){
 				clearedCount++;
 			}
-			if(clearedCount>30){
+			if(clearedCount>5){
 				if(type==0){
 					CommunicationInstance.ToggleValve(true);
-					vTaskDelay( SystemConfig.CleanTime );
+					if(SystemConfig.IsInternalClean){
+						HAL_Delay(SystemConfig.CleanTime);
+					}
+					else{
+						vTaskDelay( SystemConfig.CleanTime );
+					}
 				}else{
 					CommunicationInstance.TogglePump(false);
 				}
@@ -850,8 +884,10 @@ void StartCleanTask(void *argument){
 		else if(type==1){
 			CommunicationInstance.ToggleValve(false);
 			CommunicationInstance.TogglePump(true);
-			osThreadTerminate(ThreadStorage.PumpMaxRunThreadId);
-			ThreadStorage.PumpMaxRunThreadId=NULL;
+			if(ThreadStorage.PumpMaxRunThreadId!=NULL&&ThreadStorage.PumpMaxRunThreadId!=0x00){
+				osThreadTerminate(ThreadStorage.PumpMaxRunThreadId);
+				ThreadStorage.PumpMaxRunThreadId=NULL;
+			}
 			type++;
 		}
 		else if(type==3){
@@ -863,7 +899,12 @@ void StartCleanTask(void *argument){
 			}
 			break;
 		}
-		vTaskDelay( xDelay );
+		if(SystemConfig.IsInternalClean){
+			HAL_Delay(xDelay);
+		}
+		else{
+			vTaskDelay( xDelay );
+		}
 	}
 }
 void StartSafeModeTask(void *argument){
@@ -895,6 +936,22 @@ void StartSafeModeTask(void *argument){
 			}
 			vTaskDelay( xDelay2 );
 		}
+	}
+}
+void FixVolume(void){
+	ClearLoadcellParams();
+	uint8_t i=0;
+	float32_t maxReaded=0;
+	while(i<10){
+		HAL_Delay(10);
+		LoadCellInstance.ReadVolume(false);
+		if(LoadCellInstance.LastReadVolumeValue>maxReaded){
+			maxReaded=LoadCellInstance.LastReadVolumeValue;
+		}
+		i++;
+	}
+	if(maxReaded>SystemConfig.VolumeAverage){
+		SystemConfig.VolumeAverage=maxReaded;
 	}
 }
 void ClearLoadcellParams(){

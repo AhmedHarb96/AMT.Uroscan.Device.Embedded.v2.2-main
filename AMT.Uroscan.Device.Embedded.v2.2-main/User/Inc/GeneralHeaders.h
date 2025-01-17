@@ -193,7 +193,8 @@ enum SuccessDataType{
 	SD_FlowCalibration=0x09,
 	SD_FirstEmg=0x0A,
 	SD_SecondEmg=0x0B,
-	SD_Stop=0xFE,
+	SD_ProcessCommand=0xFD,
+	SD_RepeatAgain=0xFE,
 	SD_Start=0xFF,
 
 };
@@ -257,7 +258,7 @@ typedef struct {
 	float32_t CalibrationWeight=1;
 	float32_t CalibrationFlow=1;
 	uint16_t CleanTime=10;
-
+	uint8_t StartHandleSeconds=0;
 	bool IsStartTest=false;
 	uint32_t StartTestTime=0;
 	bool hasRunProcess=false;
@@ -270,6 +271,9 @@ typedef struct {
 	uint8_t AverageSampleCount=100;
 	uint8_t VolumeCalibrationSampleCount=100;
 	uint8_t FlowCalibrationSampleCount=100;
+	uint8_t MinimumFlowSensiblity=0;
+	uint8_t WaitAfterProcessSeconds=0;
+	bool IsInternalClean=false;
 } SystemConfigStruct;
 
 extern SystemConfigStruct SystemConfig;

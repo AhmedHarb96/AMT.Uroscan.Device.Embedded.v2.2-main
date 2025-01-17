@@ -1,39 +1,40 @@
-../User/Src/../Inc/GeneralHeaders.h:273:3:SystemConfigStruct::SystemConfigStruct()	1
+../User/Src/../Inc/GeneralHeaders.h:277:3:SystemConfigStruct::SystemConfigStruct()	1
 ../User/Src/../Inc/FlashManager.h:16:7:constexpr FlashManager::FlashManager(const FlashManager&)	1
 ../User/Src/SystemAdapter.cpp:59:6:void SetupOS()	1
-../User/Src/SystemAdapter.cpp:68:6:void UpdatePriority()	1
-../User/Src/SystemAdapter.cpp:81:6:void StartOS()	1
-../User/Src/SystemAdapter.cpp:112:6:void HardReset()	1
-../User/Src/SystemAdapter.cpp:116:6:void FlashInitialize()	2
-../User/Src/SystemAdapter.cpp:162:6:void SuccessResult()	1
-../User/Src/SystemAdapter.cpp:166:6:void SuccessDataResult(uint8_t, uint8_t, uint8_t*, int)	3
-../User/Src/SystemAdapter.cpp:180:6:void ErrorDataResult(uint8_t, uint8_t, uint16_t)	1
-../User/Src/SystemAdapter.cpp:193:6:void ErrorResult(uint8_t, uint16_t)	1
-../User/Src/SystemAdapter.cpp:202:6:void StartReadUARTTask(void*)	7
-../User/Src/SystemAdapter.cpp:234:6:void WriteUart(uint8_t*, int)	3
-../User/Src/SystemAdapter.cpp:247:6:void WriteUartSafe(uint8_t*, int)	4
-../User/Src/SystemAdapter.cpp:268:6:void StartSendUARTTask(void*)	16
-../User/Src/SystemAdapter.cpp:396:6:void StartFirstEmgTask(void*)	2
-../User/Src/SystemAdapter.cpp:416:6:void StartReadFirstEmgTask(void*)	2
-../User/Src/SystemAdapter.cpp:458:6:void StartSecondEmgTask(void*)	2
-../User/Src/SystemAdapter.cpp:478:6:void StartReadSecondEmgTask(void*)	2
-../User/Src/SystemAdapter.cpp:519:6:void StartFlowTask(void*)	2
-../User/Src/SystemAdapter.cpp:538:6:void StartReadFlowTask(void*)	2
-../User/Src/SystemAdapter.cpp:588:6:void StartVolumeTask(void*)	2
-../User/Src/SystemAdapter.cpp:609:6:void StartReadVolumeTask(void*)	2
-../User/Src/SystemAdapter.cpp:660:6:void StartAutoClosePumpTask(void*)	1
-../User/Src/SystemAdapter.cpp:672:6:void StartAutoCloseValveTask(void*)	1
-../User/Src/SystemAdapter.cpp:686:6:void StartLoadcellAverageTask(void*)	3
-../User/Src/SystemAdapter.cpp:735:6:void StartCalibrationVolumeTask(void*)	4
-../User/Src/SystemAdapter.cpp:775:6:void StartCalibrationFlowTask(void*)	5
-../User/Src/SystemAdapter.cpp:815:6:void StartCleanTask(void*)	12
-../User/Src/SystemAdapter.cpp:869:6:void StartSafeModeTask(void*)	8
-../User/Src/SystemAdapter.cpp:900:6:void ClearLoadcellParams()	1
-../User/Src/SystemAdapter.cpp:905:14:FlashManager GetFlashManager()	1
-../User/Src/SystemAdapter.cpp:908:9:uint8_t HasCalibration()	3
-../User/Src/SystemAdapter.cpp:915:9:uint8_t HasLoadcell()	2
-../User/Src/SystemAdapter.cpp:923:9:uint8_t HasFirstEmg()	3
-../User/Src/SystemAdapter.cpp:931:9:uint8_t HasSecondEmg()	3
-../User/Src/SystemAdapter.cpp:938:1:void __static_initialization_and_destruction_0(int, int)	5
-../User/Src/SystemAdapter.cpp:938:1:cpp)	1
-../User/Src/SystemAdapter.cpp:938:1:cpp)	1
+../User/Src/SystemAdapter.cpp:67:6:void UpdatePriority()	1
+../User/Src/SystemAdapter.cpp:80:6:void StartOS()	1
+../User/Src/SystemAdapter.cpp:110:6:void HardReset()	1
+../User/Src/SystemAdapter.cpp:114:6:void FlashInitialize()	2
+../User/Src/SystemAdapter.cpp:160:6:void SuccessResult()	1
+../User/Src/SystemAdapter.cpp:164:6:void SuccessDataResult(uint8_t, uint8_t, uint8_t*, int)	3
+../User/Src/SystemAdapter.cpp:178:6:void ErrorDataResult(uint8_t, uint8_t, uint16_t)	1
+../User/Src/SystemAdapter.cpp:191:6:void ErrorResult(uint8_t, uint16_t)	1
+../User/Src/SystemAdapter.cpp:199:6:void StartReadUARTTask(void*)	8
+../User/Src/SystemAdapter.cpp:250:6:void WriteUart(uint8_t*, int)	3
+../User/Src/SystemAdapter.cpp:263:6:void WriteUartSafe(uint8_t*, int)	4
+../User/Src/SystemAdapter.cpp:284:6:void StartSendUARTTask(void*)	24
+../User/Src/SystemAdapter.cpp:422:6:void StartFirstEmgTask(void*)	2
+../User/Src/SystemAdapter.cpp:442:6:void StartReadFirstEmgTask(void*)	2
+../User/Src/SystemAdapter.cpp:485:6:void StartSecondEmgTask(void*)	2
+../User/Src/SystemAdapter.cpp:505:6:void StartReadSecondEmgTask(void*)	2
+../User/Src/SystemAdapter.cpp:546:6:void StartFlowTask(void*)	2
+../User/Src/SystemAdapter.cpp:565:6:void StartReadFlowTask(void*)	2
+../User/Src/SystemAdapter.cpp:615:6:void StartVolumeTask(void*)	2
+../User/Src/SystemAdapter.cpp:636:6:void StartReadVolumeTask(void*)	2
+../User/Src/SystemAdapter.cpp:687:6:void StartAutoClosePumpTask(void*)	1
+../User/Src/SystemAdapter.cpp:699:6:void StartAutoCloseValveTask(void*)	1
+../User/Src/SystemAdapter.cpp:713:6:void StartLoadcellAverageTask(void*)	3
+../User/Src/SystemAdapter.cpp:762:6:void StartCalibrationVolumeTask(void*)	4
+../User/Src/SystemAdapter.cpp:802:6:void StartCalibrationFlowTask(void*)	5
+../User/Src/SystemAdapter.cpp:842:6:void StartCleanTask(void*)	18
+../User/Src/SystemAdapter.cpp:910:6:void StartSafeModeTask(void*)	8
+../User/Src/SystemAdapter.cpp:941:6:void FixVolume()	4
+../User/Src/SystemAdapter.cpp:957:6:void ClearLoadcellParams()	1
+../User/Src/SystemAdapter.cpp:962:14:FlashManager GetFlashManager()	1
+../User/Src/SystemAdapter.cpp:965:9:uint8_t HasCalibration()	3
+../User/Src/SystemAdapter.cpp:972:9:uint8_t HasLoadcell()	2
+../User/Src/SystemAdapter.cpp:980:9:uint8_t HasFirstEmg()	3
+../User/Src/SystemAdapter.cpp:988:9:uint8_t HasSecondEmg()	3
+../User/Src/SystemAdapter.cpp:995:1:void __static_initialization_and_destruction_0(int, int)	5
+../User/Src/SystemAdapter.cpp:995:1:cpp)	1
+../User/Src/SystemAdapter.cpp:995:1:cpp)	1
