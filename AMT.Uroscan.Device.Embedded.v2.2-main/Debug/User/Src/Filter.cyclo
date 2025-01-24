@@ -1,8 +1,0 @@
-../User/Src/Filter.cpp:10:1:Filter::Filter()	1
-../User/Src/Filter.cpp:15:1:Filter::~Filter()	1
-../User/Src/Filter.cpp:15:1:virtual Filter::~Filter()	1
-../User/Src/Filter.cpp:19:6:void Filter::HighPassFilterInit(HighPassFilterStruct*, float32_t, float32_t, float32_t)	1
-../User/Src/Filter.cpp:31:11:float32_t Filter::HighPassFilter(HighPassFilterStruct*, float32_t)	1
-../User/Src/Filter.cpp:46:6:void Filter::LowPassFilterInit(LowPassFilterStruct*, float32_t, float32_t)	3
-../User/Src/Filter.cpp:56:11:float32_t Filter::LowPassFilter(LowPassFilterStruct*, float32_t, float32_t&)	2
-../User/Src/Filter.cpp:65:11:float32_t Filter::MoovingAverage(float32_t*, float32_t*, uint32_t, uint32_t, float32_t)	4

@@ -81,6 +81,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 UroScan_RTOS_v2.2.list \
 
+OBJCOPY_HEX += \
+UroScan_RTOS_v2.2.hex \
+
 
 # All Target
 all: main-build
@@ -89,8 +92,8 @@ all: main-build
 main-build: UroScan_RTOS_v2.2.elf secondary-outputs
 
 # Tool invocations
-UroScan_RTOS_v2.2.elf UroScan_RTOS_v2.2.map: $(OBJS) $(USER_OBJS) C:\Users\argea\Desktop\UroScanV2.2_Rev1\UroScanV2.2_Rev1\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "UroScan_RTOS_v2.2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\argea\Desktop\UroScanV2.2_Rev1\UroScanV2.2_Rev1\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="UroScan_RTOS_v2.2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+UroScan_RTOS_v2.2.elf UroScan_RTOS_v2.2.map: $(OBJS) $(USER_OBJS) C:\Users\argea\Desktop\25012401_UroScanV2.2_Rev1\UroScanV2.2_Rev1\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-g++ -o "UroScan_RTOS_v2.2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\argea\Desktop\25012401_UroScanV2.2_Rev1\UroScanV2.2_Rev1\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="UroScan_RTOS_v2.2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -104,12 +107,17 @@ UroScan_RTOS_v2.2.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEP
 	@echo 'Finished building: $@'
 	@echo ' '
 
+UroScan_RTOS_v2.2.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "UroScan_RTOS_v2.2.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) UroScan_RTOS_v2.2.elf UroScan_RTOS_v2.2.list UroScan_RTOS_v2.2.map default.size.stdout
+	-$(RM) UroScan_RTOS_v2.2.elf UroScan_RTOS_v2.2.hex UroScan_RTOS_v2.2.list UroScan_RTOS_v2.2.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

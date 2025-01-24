@@ -18,7 +18,6 @@ Communication::~Communication() {
 }
 
 void Communication::ProcessCommand(uint8_t *command){
-
 	switch(command[0]){
 	case RequestType::R_System:
 		System(command);
@@ -32,11 +31,9 @@ void Communication::ProcessCommand(uint8_t *command){
 	default:
 		ErrorResult(OperationCodes::ReadData, Errors::UndefinedProcessType);
 		break;
-
 	}
 }
 void Communication::System(uint8_t *command){
-
 	if(command[0]!=RequestType::R_System) return;
 	uint16_t calibrationWeight = 500;
 	uint16_t calibrationFlow = 12;
@@ -56,14 +53,15 @@ void Communication::System(uint8_t *command){
 		   	data[9]=ThreadStorage.CleanThreadId!=NULL&&ThreadStorage.FirstEmgThreadId!=0x00;
 		   	data[10]=Statuses.SafeMode;
 		   	SuccessDataResult(100,SuccessDataType::SD_Status,data,11);
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			break;
 	   case SystemRequestType::SYSR_Restart:
-		   	SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 		    HAL_NVIC_SystemReset();
 	        break;
 	   case SystemRequestType::SYSR_FactoryReset:
-		   	SuccessResult();
-		   HardReset();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
+			HardReset();
 		   break;
 	   case SystemRequestType::SYSR_MeasurementAverage:
 		   	 ClearLoadcellParams();
@@ -81,10 +79,9 @@ void Communication::System(uint8_t *command){
 		   	 break;
 		default:
 			ErrorResult(OperationCodes::ReadData, Errors::UndefinedSystemType);
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			break;
 	 }
-
-
 }
 
 void Communication::Command(uint8_t *command){
@@ -100,121 +97,143 @@ void Communication::Command(uint8_t *command){
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
 					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			 ToggleFirstEmg(command[2]==1);  	     //Check SubFunction
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_SecondEmg:
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
 					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			ToggleSecondEmg(command[2]==1);    	 //Check SubFunction
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_LoadcellMeasure:
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
 					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			if(SystemConfig.VolumeAverage==0 || SystemConfig.FlowAverage==0){
 				ErrorResult(OperationCodes::ReadData, Errors::HasNotAverage);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			if(SystemConfig.FlowRate<2 || SystemConfig.VolumeRate<2){
 				ErrorResult(OperationCodes::ReadData, Errors::HasNotCalibration);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			 ToggleLoadCell(command[2]==1);
-			 SuccessResult();
+			 SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_Pump:
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
 					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				 SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			TogglePump(command[2]==1); 	 	 //Check SubFunction
-			 SuccessResult();
+			 SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_Valve:
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
 					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				 SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			ToggleValve(command[2]==1);   	 //Check SubFunction
-			 SuccessResult();
+			 SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_Clean: //Check SubFunction
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				 SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			 cleanTime=(command[2]<<8)+command[3];
 			if(cleanTime<1){
 				ErrorResult(OperationCodes::ReadData, Errors::ValueShouldNotBeZero);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			 StartClean(cleanTime*1000);
 			 break;
 		case CommandRequestType::CMDR_Safe: //Check SubFunction
-				if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+				if(SystemConfig.systemMode!=SystemModes::EmptyMode && SystemConfig.systemMode!=SystemModes::SafeMode){
 					ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+					SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 					return;
 				}
 				ToggleSafeMode(command[2]==1);
-				 SuccessResult();
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_DataStream:
-			if(SystemConfig.systemMode!=SystemModes::EmptyMode){
+			if(SystemConfig.systemMode!=SystemModes::EmptyMode && SystemConfig.systemMode!= SystemModes::TestMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			ToggleDataStream(command[2]==1);
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_ReadVolume:
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
 					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			if(SystemConfig.VolumeAverage==0 || SystemConfig.FlowAverage==0){
 				ErrorResult(OperationCodes::ReadData, Errors::HasNotAverage);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			 ToggleReadVolume(command[2]==1);
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_ReadFlow:
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
 					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			if(SystemConfig.FlowRate<2 || SystemConfig.VolumeRate<2){
 				ErrorResult(OperationCodes::ReadData, Errors::HasNotCalibration);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			 ToggleReadFlow(command[2]==1);
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_ReadFirstEmg:
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
 					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			 ToggleReadFirstEmg(command[2]==1);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_ReadSecondEmg:
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode&&SystemConfig.systemMode!=SystemModes::TestMode
 					&&SystemConfig.systemMode!=SystemModes::ManuelMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			 ToggleReadSecondEmg(command[2]==1);
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case CommandRequestType::CMDR_StopTest:
 			 cleanTime=(command[2]<<8)+command[3];
@@ -223,14 +242,17 @@ void Communication::Command(uint8_t *command){
 		case CommandRequestType::CMDR_StartTest:
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			if(SystemConfig.VolumeAverage==0 || SystemConfig.FlowAverage==0){
 				ErrorResult(OperationCodes::ReadData, Errors::HasNotAverage);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			if(SystemConfig.FlowRate<2 || SystemConfig.VolumeRate<2){
 				ErrorResult(OperationCodes::ReadData, Errors::HasNotCalibration);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			 cleanTime=(command[3]<<8)+command[4];
@@ -240,6 +262,7 @@ void Communication::Command(uint8_t *command){
 			 break;
 		default:
 			ErrorResult(OperationCodes::ReadData, Errors::UndefinedCommandType);
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 	}
 }
@@ -257,34 +280,35 @@ void Communication::Configuration(uint8_t *command){
 	{
 		case ConfigurationRequestType::CFGR_ReadConfiguration:
 			 SuccessDataResult(100,SuccessDataType::SD_Configuration, SystemConfig.Backup,SystemConfig.BackupLen);
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case ConfigurationRequestType::CFGR_SetSendPerSecond:
 			FMI.WriteSendPerSecond(command[2]);
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case ConfigurationRequestType::CFGR_SetFirstEmgPerSecond:
 			FMI.WriteFirstEmgPerSecond(command[2]);
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case ConfigurationRequestType::CFGR_SetSecondEmgPerSecond:
 			FMI.WriteSecondEmgPerSecond(command[2]);
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case ConfigurationRequestType::CFGR_SetVolumePerSecond:
 			FMI.WriteVolumePerSecond(command[2]);
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case ConfigurationRequestType::CFGR_SetFlowPerSecond:
 			FMI.WriteFlowPerSecond(command[2]);
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case ConfigurationRequestType::CFGR_SetPumpMaxRunTime:
 			FMI.WritePumpMaxRunTime(command[2]);
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case ConfigurationRequestType::CFGR_SetValveMaxRunTime:
 			FMI.WriteValveMaxRunTime(command[2]);
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		 case ConfigurationRequestType::CFGR_SetCalibrationFirstEmg:
 				maxTrim=(command[2]<<8)+command[3];
@@ -292,14 +316,16 @@ void Communication::Configuration(uint8_t *command){
 				zeroPointMinTrim=(command[6]<<8)+command[7];
 				if(maxTrim<1){
 					ErrorResult(OperationCodes::ReadData, Errors::ValueShouldNotBeZero);
+					SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 					return;
 				}
 				if(zeroPointMinTrim>=zeroPointMaxTrim){
 					ErrorResult(OperationCodes::ReadData, Errors::MinValueCanNotBeGreaterThanMaxValue);
+					SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 					return;
 				}
 				FMI.WriteFirstEmgData(maxTrim, zeroPointMaxTrim, zeroPointMinTrim);
-			 SuccessResult();
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case ConfigurationRequestType::CFGR_SetCalibrationSecondEmg:
 			maxTrim=(command[2]<<8)+command[3];
@@ -307,22 +333,25 @@ void Communication::Configuration(uint8_t *command){
 			zeroPointMinTrim=(command[6]<<8)+command[7];
 			if(maxTrim<1){
 				ErrorResult(OperationCodes::ReadData, Errors::ValueShouldNotBeZero);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			if(zeroPointMinTrim>=zeroPointMaxTrim){
 				ErrorResult(OperationCodes::ReadData, Errors::MinValueCanNotBeGreaterThanMaxValue);
+				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 				return;
 			}
 			FMI.WriteSecondEmgData(maxTrim, zeroPointMaxTrim, zeroPointMinTrim);
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 		case ConfigurationRequestType::CFGR_SaveFlash:
 			FMI.Update();
 			FlashInitialize();
-			 SuccessResult();
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			break;
 		default:
 			ErrorResult(OperationCodes::ReadData, Errors::UndefinedConfigurationType);
+			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
 			 break;
 	}
 }
@@ -456,6 +485,7 @@ void Communication::ToggleValve(bool isStart){
 void Communication::ToggleDataStream(bool isStart){
 	if(SystemConfig.systemMode!=SystemModes::EmptyMode && SystemConfig.systemMode!=SystemModes::TestMode){
 		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		SendFeedback(RequestType::R_Command,CommandRequestType::CMDR_DataStream, ProcessStatuses::PS_End);
 		return;
 	}
 	SystemConfig.IsStartTest=isStart;
@@ -494,6 +524,7 @@ void Communication::StopTest(uint16_t cleanTime){
 void Communication::StartClean(uint16_t cleanTime){
 	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
 		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		 SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_Clean, ProcessStatuses::PS_End);
 		return;
 	}
 	SystemConfig.systemMode=SystemModes::CleanMode;
@@ -509,6 +540,7 @@ void Communication::ToggleSafeMode(bool isStart){
 	Statuses.SafeMode=isStart;
 	if(SystemConfig.systemMode!=SystemModes::EmptyMode && SystemConfig.systemMode!=SystemModes::SafeMode){
 		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_Safe, ProcessStatuses::PS_End);
 		return;
 	}
 	if(isStart){
@@ -519,12 +551,15 @@ void Communication::ToggleSafeMode(bool isStart){
 	}
 	SystemConfig.systemMode=SystemModes::EmptyMode;
 	osThreadTerminate(ThreadStorage.SafeModeThreadId);
+	TogglePump(false);
+	ToggleValve(false);
 	ThreadStorage.SafeModeThreadId=NULL;
 }
 
 void Communication::LoadcellAverage(){
 	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
 		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		SendFeedback(RequestType::R_System, SystemRequestType::SYSR_MeasurementAverage, ProcessStatuses::PS_End);
 		return;
 	}
 	SystemConfig.systemMode=SystemModes::CalibrationMode;
@@ -534,6 +569,7 @@ void Communication::LoadcellAverage(){
 void Communication::LoadcellVolumeCalibration(uint16_t weight){
 	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
 		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		SendFeedback(RequestType::R_System, SystemRequestType::SYSR_CalibrationVolume, ProcessStatuses::PS_End);
 		return;
 	}
 	SystemConfig.systemMode=SystemModes::CalibrationMode;
@@ -545,6 +581,7 @@ void Communication::LoadcellVolumeCalibration(uint16_t weight){
 void Communication::LoadcellFlowCalibration(uint16_t flow){
 	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
 		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
+		SendFeedback(RequestType::R_System, SystemRequestType::SYSR_CalibrationFlow, ProcessStatuses::PS_End);
 		return;
 	}
 	SystemConfig.systemMode=SystemModes::CalibrationMode;

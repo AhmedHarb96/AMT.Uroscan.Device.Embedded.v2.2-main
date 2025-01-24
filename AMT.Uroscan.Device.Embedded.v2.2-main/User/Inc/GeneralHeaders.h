@@ -344,6 +344,19 @@ typedef struct{
 } StatusStruct;
 extern StatusStruct Statuses;
 
+enum ProcessStatuses{
+	PS_Empty,
+	PS_Processing,
+	PS_End
+};
+
+typedef struct {
+	uint8_t ProcessType;
+	uint8_t SubType;
+	ProcessStatuses Status=ProcessStatuses::PS_Empty;
+} ProcessTrackerStruct;
+extern ProcessTrackerStruct ProcessTracker;
+
 
 
 

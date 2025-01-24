@@ -21,7 +21,6 @@ ThreadStorageStruct ThreadStorage;
 StatusStruct Statuses;
 SystemConfigStruct SystemConfig;
 DebuggerStruct Debugger;
-
 uint16_t totalLen=7;
 uint8_t allData[4096];
 
@@ -56,6 +55,7 @@ const osSemaphoreAttr_t volumeSemaphore_attributes = {
 const osSemaphoreAttr_t communicationSemaphore_attributes = {
   .name = "CommunicationSemaphoreHandle"
 };
+
 void SetupOS(void){
 	EmgInstance.FirstEmgSetup();
 	EmgInstance.SecondEmgSetup();
@@ -64,6 +64,7 @@ void SetupOS(void){
 	CommunicationInstance.SetFlashManager(FlashManagerInstance);
 	osKernelInitialize();
 }
+
 void UpdatePriority(void){
 	HAL_TIM_Base_Start_IT(&htim11);
 	ThreadStorage.FirstEmgThreadAttr=normalPriority;
@@ -77,6 +78,7 @@ void UpdatePriority(void){
 	ThreadStorage.CleanThreadAttr=normalPriority;
 	ThreadStorage.SafeModeThreadAttr=normalPriority;
 }
+
 void StartOS(void){
 	UpdatePriority();
 	/*
@@ -93,6 +95,15 @@ void StartOS(void){
 		LoadCellInstance.ReadVolume(false);
 		LoadCellInstance.ReadFlow(false);
 	}
+
+	uint16_t cnt=0;
+	uint8_t uartData[2];
+	while(true){
+		cnt++;
+		uartData[0]=(cnt & 0xFF00)>>8;
+		uartData[1]=(cnt & 0x00FF);
+		WriteUart(uartData, 2);
+	}
 	*/
 	HAL_Delay( 1000 );
    	uint8_t data[4];
@@ -101,6 +112,7 @@ void StartOS(void){
    	data[2]=HasFirstEmg();//HasFirstEmg
    	data[3]=HasSecondEmg();//HasSecondEmg
 	SuccessDataResult(0, SuccessDataType::SD_Start, data, 4);
+	SendFeedback(0,0,0);
 
 	ThreadStorage.ReadUARTThreadId=osThreadNew(StartReadUARTTask, NULL, &highPriority);
 	osKernelStart();
@@ -161,6 +173,18 @@ void SuccessResult(void){
 	uint8_t data[1]={0x01};
 	WriteUart(data, 1);
 }
+
+void SendFeedback(uint8_t processType,uint8_t subType, uint8_t status){
+	uint8_t uartData[6]={0};
+	uint16_t xLen=3;
+	uartData[0]=0x04;
+	uartData[1]=(xLen & 0xFF00)>>8;
+	uartData[2]=(xLen & 0x00FF);
+	uartData[3]=processType;
+	uartData[4]=subType;
+	uartData[5]=status;
+	WriteUart(uartData, 6);
+}
 void SuccessDataResult(uint8_t percent,uint8_t dataType,uint8_t *data,int len){
 	uint8_t uartData[len+6]={0};
 	uint16_t xLen=len+3;
@@ -198,7 +222,7 @@ void ErrorResult(uint8_t opCode,uint16_t errorCode){
 }
 void StartReadUARTTask(void *argument){
 
-	const TickType_t xDelay = 50 / portTICK_PERIOD_MS;  //300
+	const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
 	//osStatus_t communicationSemaphoreVal;
 	ThreadStorage.CommunicationSemaphoreHandle = osSemaphoreNew(1, 1, &communicationSemaphore_attributes);
 	ThreadStorage.SendUARTThreadId=osThreadNew(StartSendUARTTask, NULL, &normalPriority);
@@ -209,7 +233,7 @@ void StartReadUARTTask(void *argument){
 		//if(newPos>0){
 			HAL_StatusTypeDef status=HAL_UART_Receive_DMA(&huart1, data, 8);
 			if (status == HAL_OK&&(data[0]==1||data[0]==2||data[0]==3)) {
-				SuccessDataResult(100, SuccessDataType::SD_ProcessCommand, data, 8);
+				SendFeedback(data[0], data[1], ProcessStatuses::PS_Processing);
 				CommunicationInstance.ProcessCommand(data);
 	        }
 			else if(status != HAL_TIMEOUT && status != HAL_BUSY && status != HAL_OK){
@@ -752,6 +776,7 @@ void StartLoadcellAverageTask(void *argument){
 			FlashManagerInstance.WriteVolumeAverage(SystemConfig.VolumeAverage);
 			FlashManagerInstance.WriteFlowAverage(SystemConfig.FlowAverage);
 			SuccessDataResult(100, SuccessDataType::SD_MeasurementAverage, data, 8);
+			SendFeedback(RequestType::R_System, SystemRequestType::SYSR_MeasurementAverage, ProcessStatuses::PS_End);
 			SystemConfig.systemMode=SystemModes::EmptyMode;
 			osThreadTerminate(ThreadStorage.LoadcellAverageThreadId);
 			ThreadStorage.LoadcellAverageThreadId=NULL;
@@ -792,6 +817,7 @@ void StartCalibrationVolumeTask(void *argument){
 			SystemConfig.VolumeRate=((double_t)sumVolume/(double_t)instanceCount)/SystemConfig.CalibrationWeight;
 			FlashManagerInstance.WriteVolumeRate(SystemConfig.VolumeRate);
 			SuccessDataResult(100, SuccessDataType::SD_VolumeCalibration, rateArray, 4);
+			SendFeedback(RequestType::R_System, SystemRequestType::SYSR_CalibrationVolume, ProcessStatuses::PS_End);
 			SystemConfig.systemMode=SystemModes::EmptyMode;
 			osThreadTerminate(ThreadStorage.CalibrationVolumeThreadId);
 			ThreadStorage.CalibrationVolumeThreadId=NULL;
@@ -833,6 +859,7 @@ void StartCalibrationFlowTask(void *argument){
 			FlashManagerInstance.WriteFlowRate(SystemConfig.FlowRate);
 			SystemConfig.systemMode=SystemModes::EmptyMode;
 			SuccessDataResult(100, SuccessDataType::SD_FlowCalibration, rateArray, 4);
+			SendFeedback(RequestType::R_System, SystemRequestType::SYSR_CalibrationFlow, ProcessStatuses::PS_End);
 			osThreadTerminate(ThreadStorage.CalibrationFlowThreadId);
 			ThreadStorage.CalibrationFlowThreadId=NULL;
 		}
@@ -891,7 +918,9 @@ void StartCleanTask(void *argument){
 			type++;
 		}
 		else if(type==3){
-			SuccessResult();
+			if(!SystemConfig.IsInternalClean){
+				SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_Clean, ProcessStatuses::PS_End);
+			}
 			SystemConfig.systemMode=SystemModes::EmptyMode;
 			if(ThreadStorage.CleanThreadId!=0x00&&ThreadStorage.CleanThreadId!=NULL){
 				osThreadTerminate(ThreadStorage.CleanThreadId);

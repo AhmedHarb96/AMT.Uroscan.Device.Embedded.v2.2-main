@@ -30,6 +30,7 @@ void ErrorDataResult(uint8_t percent, uint8_t opCode,uint16_t errorCode);
 void ErrorResult(uint8_t opCode,uint16_t errorCode);
 void StartReadUARTTask(void *argument);
 void StartSendUARTTask(void *argument);
+void SendFeedback(uint8_t processType,uint8_t subType, uint8_t status);
 void StartFirstEmgTask(void *argument);
 void StartSecondEmgTask(void *argument);
 void StartVolumeTask(void *argument);

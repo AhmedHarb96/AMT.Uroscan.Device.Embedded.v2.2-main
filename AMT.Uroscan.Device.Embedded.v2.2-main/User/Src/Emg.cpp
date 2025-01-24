@@ -163,7 +163,7 @@ uint32_t Emg::SecondEmgMovingAverageFilter(uint32_t newSample){
 	}
 	newVal=(LastSecondEmg*90+newVal*10)/100;
 	LastSecondEmg=newVal;
-	newVal=newVal-250; //250
+	newVal=newVal-50; //250
 	if(newVal>=66000) newVal=0;
 	return newVal;
 }
