@@ -512,12 +512,14 @@ void Communication::StartTest(bool isStartFirstEmg,bool isStartSecondEmg,bool is
 void Communication::StopTest(uint16_t cleanTime){
 	SystemConfig.CleanTime=cleanTime;
 	ToggleDataStream(false);
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StopTest, ProcessStatuses::PS_Processing);
 	ToggleFirstEmg(false);
 	ToggleSecondEmg(false);
 	ToggleLoadCell(false);
 	StartCleanTask(NULL);
 	SystemConfig.PocketIndex=0;
 	SystemConfig.systemMode=SystemModes::EmptyMode;
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StopTest, ProcessStatuses::PS_End);
     HAL_NVIC_SystemReset();
 }
 
