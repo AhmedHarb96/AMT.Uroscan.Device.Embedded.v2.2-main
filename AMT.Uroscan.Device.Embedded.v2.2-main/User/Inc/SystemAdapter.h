@@ -14,7 +14,7 @@ extern "C" {
 
 
 #include "main.h"
-#include "stdbool.h"
+
 
 extern volatile uint32_t StartTimerTicks;
 
@@ -49,9 +49,9 @@ void StartSafeModeTask(void *argument);
 void FixVolume(void);
 void ClearLoadcellParams();
 uint8_t HasCalibration(void);
-uint8_t HasLoadcell(bool read);
-uint8_t HasFirstEmg(bool read);
-uint8_t HasSecondEmg(bool read);
+uint8_t HasLoadcell(void);
+uint8_t HasFirstEmg(void);
+uint8_t HasSecondEmg(void);
 
 #ifdef __cplusplus
 }
