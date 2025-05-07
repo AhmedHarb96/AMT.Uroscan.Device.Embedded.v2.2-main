@@ -33,6 +33,7 @@ void Communication::ProcessCommand(uint8_t *command){
 		break;
 	}
 }
+bool pauseFlg = false;//***//
 void Communication::System(uint8_t *command){
 	if(command[0]!=RequestType::R_System) return;
 	uint16_t calibrationWeight = 500;
@@ -239,7 +240,7 @@ void Communication::Command(uint8_t *command){
 			 cleanTime=(command[2]<<8)+command[3];
 			StopTest(cleanTime);
 			 break;
-		case CommandRequestType::CMDR_StartTest:
+		case CommandRequestType::CMDR_StartTest:        //############################# Start Test #################
 			if(SystemConfig.systemMode!=SystemModes::EmptyMode){
 				ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);
 				SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
@@ -260,6 +261,26 @@ void Communication::Command(uint8_t *command){
 			 SystemConfig.WaitAfterProcessSeconds=command[6];
 			StartTest(isOpenFirstEmg, isOpenSecondEmg, isOpenLoadcell,cleanTime,command[7]);
 			 break;
+
+		case CommandRequestType::CMDR_PauseTest:
+			pauseTest();
+			break;
+		case CommandRequestType::CMDR_ResumeTest:
+			resumeTest();
+			break;
+		case CommandRequestType::CMDR_CancelTest:
+			cancelTest();
+			break;
+
+		case CommandRequestType::CMDR_StartManPrep:
+			cleanTime=(command[3]<<8)+command[4];
+			ManualPrep(cleanTime);
+			break;
+		case CommandRequestType::CMDR_StartManTest:
+			cleanTime=(command[3]<<8)+command[4];  //0;
+			StartManTest(isOpenFirstEmg, isOpenSecondEmg, isOpenLoadcell,cleanTime,command[7]);
+			break;
+
 		default:
 			ErrorResult(OperationCodes::ReadData, Errors::UndefinedCommandType);
 			SendFeedback(command[0], command[1], ProcessStatuses::PS_End);
@@ -489,7 +510,7 @@ void Communication::ToggleDataStream(bool isStart){
 		return;
 	}
 	SystemConfig.IsStartTest=isStart;
-	if(isStart){
+	if(isStart&&!pauseFlg){
 		SystemConfig.StartTestTime=StartTimerTicks;
 		SystemConfig.systemMode=SystemModes::TestMode;
 		return;
@@ -512,15 +533,69 @@ void Communication::StartTest(bool isStartFirstEmg,bool isStartSecondEmg,bool is
 void Communication::StopTest(uint16_t cleanTime){
 	SystemConfig.CleanTime=cleanTime;
 	ToggleDataStream(false);
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StopTest, ProcessStatuses::PS_Processing);
 	ToggleFirstEmg(false);
 	ToggleSecondEmg(false);
 	ToggleLoadCell(false);
 	StartCleanTask(NULL);
 	SystemConfig.PocketIndex=0;
 	SystemConfig.systemMode=SystemModes::EmptyMode;
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StopTest, ProcessStatuses::PS_End);
     HAL_NVIC_SystemReset();
 }
 
+//**************************************** Resume/Pause FNs *******************************************//
+void Communication::resumeTest(void){
+	ToggleFirstEmg(true);
+	ToggleSecondEmg(true);
+	ToggleLoadCell(true);
+	ToggleDataStream(true);
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_ResumeTest, ProcessStatuses::PS_End);
+}
+void Communication::pauseTest(void){
+	pauseFlg = true;
+	ToggleDataStream(false);
+	ToggleFirstEmg(false);
+	ToggleSecondEmg(false);
+	ToggleLoadCell(false);
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_PauseTest, ProcessStatuses::PS_End);
+}
+void Communication::cancelTest(void){
+	pauseFlg = false;
+	SystemConfig.CleanTime=0;//cleanTime;
+	ToggleDataStream(false);
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_CancelTest, ProcessStatuses::PS_Processing);
+	ToggleFirstEmg(false);
+	ToggleSecondEmg(false);
+	ToggleLoadCell(false);
+	//StartCleanTask(NULL);
+	//StartPreManualTask(NULL);
+	SystemConfig.PocketIndex=0;
+	SystemConfig.systemMode=SystemModes::EmptyMode;
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_CancelTest, ProcessStatuses::PS_End);
+    HAL_NVIC_SystemReset();
+}
+//*********************************  Manual Mode Functions **********************************//
+void Communication::ManualPrep(uint16_t cleanTime){
+	SystemConfig.CleanTime=cleanTime;
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManPrep, ProcessStatuses::PS_Processing);
+	StartCleanTask(NULL);
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManPrep, ProcessStatuses::PS_End);
+}
+void Communication::StartManTest(bool isStartFirstEmg,bool isStartSecondEmg,bool isStartLoadcell,uint16_t cleanTime,uint8_t startHandleSeconds){
+	SystemConfig.CleanTime=cleanTime;
+	//StartCleanTask(NULL);
+	FixVolume();
+	ToggleFirstEmg(isStartFirstEmg);
+	ToggleSecondEmg(isStartSecondEmg);
+	ToggleLoadCell(isStartLoadcell);
+	SystemConfig.StartHandleSeconds=startHandleSeconds;
+	ToggleDataStream(true);
+	SystemConfig.PocketIndex=0;
+	SystemConfig.systemMode=SystemModes::TestMode;
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManTest, ProcessStatuses::PS_End);
+}
+//******************************************************************************************//
 void Communication::StartClean(uint16_t cleanTime){
 	if(SystemConfig.systemMode!=SystemModes::EmptyMode){
 		ErrorResult(OperationCodes::ReadData, Errors::HasRunProcess);

@@ -108,9 +108,9 @@ void StartOS(void){
 	HAL_Delay( 1000 );
    	uint8_t data[4];
    	data[0]=HasCalibration();//HasCalibration
-   	data[1]=HasLoadcell();//HasLoadcell
-   	data[2]=HasFirstEmg();//HasFirstEmg
-   	data[3]=HasSecondEmg();//HasSecondEmg
+   	data[1]=HasLoadcell(true);//HasLoadcell
+   	data[2]=HasFirstEmg(true);//HasFirstEmg
+   	data[3]=HasSecondEmg(true);//HasSecondEmg
 	SuccessDataResult(0, SuccessDataType::SD_Start, data, 4);
 	SendFeedback(0,0,0);
 
@@ -222,7 +222,7 @@ void ErrorResult(uint8_t opCode,uint16_t errorCode){
 }
 void StartReadUARTTask(void *argument){
 
-	const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
+	const TickType_t xDelay = 300 / portTICK_PERIOD_MS;
 	//osStatus_t communicationSemaphoreVal;
 	ThreadStorage.CommunicationSemaphoreHandle = osSemaphoreNew(1, 1, &communicationSemaphore_attributes);
 	ThreadStorage.SendUARTThreadId=osThreadNew(StartSendUARTTask, NULL, &normalPriority);
@@ -319,7 +319,7 @@ void StartSendUARTTask(void *argument)
 	osStatus_t communicationSemaphoreVal;
   for(;;)
   {
-	  uint16_t totalLen=11;
+	  uint16_t totalLen=12;
 	  uint8_t allData[4096];
 	  firstEmgSemaphoreVal = osSemaphoreAcquire(ThreadStorage.FirstEmgSemaphoreHandle,xFrequency/10);
 	  if(firstEmgSemaphoreVal==osOK){
@@ -411,15 +411,31 @@ void StartSendUARTTask(void *argument)
 		  allData[8]=(time & 0x00FF0000) >> 16;
 		  allData[9]=(time & 0x0000FF00) >> 8;
 		  allData[10]=(time & 0x000000FF);
+		  uint8_t status=0;
+		  if(HasCalibration()){
+			  status+=1;
+		  }
+		  if(HasLoadcell(false)){
+			  status+=2;
+		  }
+		  if(HasFirstEmg(false)){
+			  status+=4;
+		  }
+		  if(HasSecondEmg(false)){
+			  status+=8;
+		  }
+		  allData[11]=status;
 		  if(SystemConfig.IsStartTest){
 			  if(SystemConfig.StartHandleSeconds>0&&SystemConfig.StartHandleSeconds*1000<time&&LoadCellInstance.IsFirstHandle==false){
-					SystemConfig.IsInternalClean=true;
-				  CommunicationInstance.StopTest(5000);
+				  //SystemConfig.IsInternalClean=true;
+				  //CommunicationInstance.StopTest(5000);
+				  CommunicationInstance.cancelTest();
 				continue;
 			  }
 			  if(SystemConfig.WaitAfterProcessSeconds>0&&SystemConfig.WaitAfterProcessSeconds*10000<StartTimerTicks-LoadCellInstance.LastHandleProcessTime&&LoadCellInstance.IsFirstHandle==true){
-				SystemConfig.IsInternalClean=true;
-				CommunicationInstance.StopTest(5000);
+				  SystemConfig.IsInternalClean=true;
+				  CommunicationInstance.StopTest(5000);
+				  //CommunicationInstance.cancelTest();
 				continue;
 			  }
 			  communicationSemaphoreVal = osSemaphoreAcquire(ThreadStorage.CommunicationSemaphoreHandle, 1000);
@@ -936,6 +952,7 @@ void StartCleanTask(void *argument){
 		}
 	}
 }
+
 void StartSafeModeTask(void *argument){
 
 	const TickType_t xDelay = 1000 / portTICK_PERIOD_MS;
@@ -998,25 +1015,30 @@ uint8_t HasCalibration(void){
 	}
 	return 1;
 }
-uint8_t HasLoadcell(void){
+uint8_t HasLoadcell(bool read){
 
-	LoadCellInstance.ReadVolumeAndFlow();
+	if(read){
+		LoadCellInstance.ReadVolumeAndFlow();
+	}
 	if(LoadCellInstance.VolumeValue==1310680){
 		return 0;
 	}
 	return 1;
 }
-uint8_t HasFirstEmg(void){
+uint8_t HasFirstEmg(bool read){
 
-	EmgInstance.FirstEmgRead(false);
+	if(read){
+		EmgInstance.FirstEmgRead(false);
+	}
 	if(EmgInstance.NonFilterFirstEmg==65535||EmgInstance.NonFilterFirstEmg==0){
 		return 0;
 	}
 	return 1;
 }
-uint8_t HasSecondEmg(void){
-
-	EmgInstance.SecondEmgRead(false);
+uint8_t HasSecondEmg(bool read){
+	if(read){
+		EmgInstance.SecondEmgRead(false);
+	}
 	if(EmgInstance.NonFilterSecondEmg==65535||EmgInstance.NonFilterSecondEmg==0){
 		return 0;
 	}

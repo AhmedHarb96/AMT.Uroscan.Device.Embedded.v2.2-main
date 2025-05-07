@@ -152,6 +152,14 @@ enum CommandRequestType{
 	CMDR_ReadFlow=0x0A,
 	CMDR_ReadFirstEmg=0x0B,
 	CMDR_ReadSecondEmg=0x0C,
+
+	CMDR_CancelTest=0x0D,
+	CMDR_PauseTest=0x0E,
+	CMDR_ResumeTest=0x0F,
+
+	CMDR_StartManPrep=0x1A,
+	CMDR_StartManTest=0x1B,
+
 	CMDR_StopTest=0xFD,
 	CMDR_StartTest=0xFF
 };

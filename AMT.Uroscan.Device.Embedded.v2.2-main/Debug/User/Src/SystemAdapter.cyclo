@@ -1,4 +1,4 @@
-../User/Src/../Inc/GeneralHeaders.h:277:3:SystemConfigStruct::SystemConfigStruct()	1
+../User/Src/../Inc/GeneralHeaders.h:285:3:SystemConfigStruct::SystemConfigStruct()	1
 ../User/Src/../Inc/FlashManager.h:16:7:constexpr FlashManager::FlashManager(const FlashManager&)	1
 ../User/Src/SystemAdapter.cpp:59:6:void SetupOS()	1
 ../User/Src/SystemAdapter.cpp:68:6:void UpdatePriority()	1
@@ -13,29 +13,30 @@
 ../User/Src/SystemAdapter.cpp:223:6:void StartReadUARTTask(void*)	8
 ../User/Src/SystemAdapter.cpp:274:6:void WriteUart(uint8_t*, int)	3
 ../User/Src/SystemAdapter.cpp:287:6:void WriteUartSafe(uint8_t*, int)	4
-../User/Src/SystemAdapter.cpp:308:6:void StartSendUARTTask(void*)	24
-../User/Src/SystemAdapter.cpp:446:6:void StartFirstEmgTask(void*)	2
-../User/Src/SystemAdapter.cpp:466:6:void StartReadFirstEmgTask(void*)	2
-../User/Src/SystemAdapter.cpp:509:6:void StartSecondEmgTask(void*)	2
-../User/Src/SystemAdapter.cpp:529:6:void StartReadSecondEmgTask(void*)	2
-../User/Src/SystemAdapter.cpp:570:6:void StartFlowTask(void*)	2
-../User/Src/SystemAdapter.cpp:589:6:void StartReadFlowTask(void*)	2
-../User/Src/SystemAdapter.cpp:639:6:void StartVolumeTask(void*)	2
-../User/Src/SystemAdapter.cpp:660:6:void StartReadVolumeTask(void*)	2
-../User/Src/SystemAdapter.cpp:711:6:void StartAutoClosePumpTask(void*)	1
-../User/Src/SystemAdapter.cpp:723:6:void StartAutoCloseValveTask(void*)	1
-../User/Src/SystemAdapter.cpp:737:6:void StartLoadcellAverageTask(void*)	3
-../User/Src/SystemAdapter.cpp:787:6:void StartCalibrationVolumeTask(void*)	4
-../User/Src/SystemAdapter.cpp:828:6:void StartCalibrationFlowTask(void*)	5
-../User/Src/SystemAdapter.cpp:869:6:void StartCleanTask(void*)	19
-../User/Src/SystemAdapter.cpp:939:6:void StartSafeModeTask(void*)	8
-../User/Src/SystemAdapter.cpp:970:6:void FixVolume()	4
-../User/Src/SystemAdapter.cpp:986:6:void ClearLoadcellParams()	1
-../User/Src/SystemAdapter.cpp:991:14:FlashManager GetFlashManager()	1
-../User/Src/SystemAdapter.cpp:994:9:uint8_t HasCalibration()	3
-../User/Src/SystemAdapter.cpp:1001:9:uint8_t HasLoadcell()	2
-../User/Src/SystemAdapter.cpp:1009:9:uint8_t HasFirstEmg()	3
-../User/Src/SystemAdapter.cpp:1017:9:uint8_t HasSecondEmg()	3
-../User/Src/SystemAdapter.cpp:1024:1:void __static_initialization_and_destruction_0(int, int)	5
-../User/Src/SystemAdapter.cpp:1024:1:cpp)	1
-../User/Src/SystemAdapter.cpp:1024:1:cpp)	1
+../User/Src/SystemAdapter.cpp:308:6:void StartSendUARTTask(void*)	28
+../User/Src/SystemAdapter.cpp:462:6:void StartFirstEmgTask(void*)	2
+../User/Src/SystemAdapter.cpp:482:6:void StartReadFirstEmgTask(void*)	2
+../User/Src/SystemAdapter.cpp:525:6:void StartSecondEmgTask(void*)	2
+../User/Src/SystemAdapter.cpp:545:6:void StartReadSecondEmgTask(void*)	2
+../User/Src/SystemAdapter.cpp:586:6:void StartFlowTask(void*)	2
+../User/Src/SystemAdapter.cpp:605:6:void StartReadFlowTask(void*)	2
+../User/Src/SystemAdapter.cpp:655:6:void StartVolumeTask(void*)	2
+../User/Src/SystemAdapter.cpp:676:6:void StartReadVolumeTask(void*)	2
+../User/Src/SystemAdapter.cpp:727:6:void StartAutoClosePumpTask(void*)	1
+../User/Src/SystemAdapter.cpp:739:6:void StartAutoCloseValveTask(void*)	1
+../User/Src/SystemAdapter.cpp:753:6:void StartLoadcellAverageTask(void*)	3
+../User/Src/SystemAdapter.cpp:803:6:void StartCalibrationVolumeTask(void*)	4
+../User/Src/SystemAdapter.cpp:844:6:void StartCalibrationFlowTask(void*)	5
+../User/Src/SystemAdapter.cpp:885:6:void StartCleanTask(void*)	19
+../User/Src/SystemAdapter.cpp:956:6:void StartSafeModeTask(void*)	8
+../User/Src/SystemAdapter.cpp:987:6:void FixVolume()	4
+../User/Src/SystemAdapter.cpp:1003:6:void ClearLoadcellParams()	1
+../User/Src/SystemAdapter.cpp:1008:14:FlashManager GetFlashManager()	1
+../User/Src/SystemAdapter.cpp:1011:9:uint8_t HasCalibration()	3
+../User/Src/SystemAdapter.cpp:1018:9:uint8_t HasLoadcell(bool)	3
+../User/Src/SystemAdapter.cpp:1028:9:uint8_t HasFirstEmg(bool)	4
+../User/Src/SystemAdapter.cpp:1038:9:uint8_t HasSecondEmg(bool)	4
+../User/Src/SystemAdapter.cpp:1046:1:void __static_initialization_and_destruction_0()	1
+../User/Src/SystemAdapter.cpp:1046:1:void __static_initialization_and_destruction_1()	1
+../User/Src/SystemAdapter.cpp:1046:1:cpp)	1
+../User/Src/SystemAdapter.cpp:1046:1:cpp)	1

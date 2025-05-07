@@ -31,6 +31,13 @@ public:
 	void ToggleReadFirstEmg(bool isStart);
 	void ToggleReadSecondEmg(bool isStart);
 	void StopTest(uint16_t cleanTime);
+	void resumeTest(void);
+	void pauseTest(void);
+	void cancelTest(void);
+
+	void ManualPrep(uint16_t cleanTime);
+	void StartManTest(bool isStartFirstEmg, bool isStartSecondEmg, bool isStartLoadcell, uint16_t cleanTime, uint8_t startHandleSeconds);
+
 	void ToggleSafeMode(bool isStart);
 	void LoadcellAverage();
 	void LoadcellVolumeCalibration(uint16_t weight);
