@@ -222,7 +222,7 @@ void ErrorResult(uint8_t opCode,uint16_t errorCode){
 }
 void StartReadUARTTask(void *argument){
 
-	const TickType_t xDelay = 300 / portTICK_PERIOD_MS;
+	const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
 	//osStatus_t communicationSemaphoreVal;
 	ThreadStorage.CommunicationSemaphoreHandle = osSemaphoreNew(1, 1, &communicationSemaphore_attributes);
 	ThreadStorage.SendUARTThreadId=osThreadNew(StartSendUARTTask, NULL, &normalPriority);

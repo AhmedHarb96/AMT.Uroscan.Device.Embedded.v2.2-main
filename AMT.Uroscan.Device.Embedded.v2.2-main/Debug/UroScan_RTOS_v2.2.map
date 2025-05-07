@@ -3957,40 +3957,40 @@ LOAD C:/ST/STM32CubeIDE_1.15.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_line    0x00018061      0xe96 ./User/Src/LoadCell.o
  .debug_line    0x00018ef7     0x18b8 ./User/Src/SystemAdapter.o
 
-.debug_str      0x00000000     0xbc7b
- .debug_str     0x00000000     0xbc7b ./Core/Src/freertos.o
+.debug_str      0x00000000     0xbcc9
+ .debug_str     0x00000000     0xbcc9 ./Core/Src/freertos.o
                                 0x1e0 (size before relaxing)
- .debug_str     0x0000bc7b     0x1975 ./Core/Src/main.o
- .debug_str     0x0000bc7b     0x12c0 ./Core/Src/stm32f4xx_hal_msp.o
- .debug_str     0x0000bc7b      0xd62 ./Core/Src/stm32f4xx_it.o
- .debug_str     0x0000bc7b      0x421 ./Core/Src/syscalls.o
- .debug_str     0x0000bc7b      0x24d ./Core/Src/sysmem.o
- .debug_str     0x0000bc7b      0x39d ./Core/Src/system_stm32f4xx.o
- .debug_str     0x0000bc7b       0x92 ./Core/Startup/startup_stm32f407vgtx.o
- .debug_str     0x0000bc7b      0xb8c ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
- .debug_str     0x0000bc7b      0xc9d ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
- .debug_str     0x0000bc7b      0x79e ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.o
- .debug_str     0x0000bc7b      0x572 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.o
- .debug_str     0x0000bc7b      0x5c2 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.o
- .debug_str     0x0000bc7b      0x508 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
- .debug_str     0x0000bc7b      0x71d ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
- .debug_str     0x0000bc7b      0xc1c ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.o
- .debug_str     0x0000bc7b     0x1727 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
- .debug_str     0x0000bc7b      0xf33 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
- .debug_str     0x0000bc7b      0xdb2 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
- .debug_str     0x0000bc7b     0x21b6 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_str     0x0000bc7b      0x32a ./Middlewares/Third_Party/FreeRTOS/Source/list.o
- .debug_str     0x0000bc7b      0xd2f ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
- .debug_str     0x0000bc7b     0x130f ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- .debug_str     0x0000bc7b      0xc70 ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
- .debug_str     0x0000bc7b      0x4aa ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
- .debug_str     0x0000bc7b      0x543 ./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o
- .debug_str     0x0000bc7b     0x2afa ./User/Src/Communication.o
- .debug_str     0x0000bc7b     0x1ca6 ./User/Src/Emg.o
- .debug_str     0x0000bc7b      0xf35 ./User/Src/Filter.o
- .debug_str     0x0000bc7b     0x1b7b ./User/Src/FlashManager.o
- .debug_str     0x0000bc7b     0x2146 ./User/Src/LoadCell.o
- .debug_str     0x0000bc7b     0x3ab0 ./User/Src/SystemAdapter.o
+ .debug_str     0x0000bcc9     0x1975 ./Core/Src/main.o
+ .debug_str     0x0000bcc9     0x12c0 ./Core/Src/stm32f4xx_hal_msp.o
+ .debug_str     0x0000bcc9      0xd62 ./Core/Src/stm32f4xx_it.o
+ .debug_str     0x0000bcc9      0x421 ./Core/Src/syscalls.o
+ .debug_str     0x0000bcc9      0x24d ./Core/Src/sysmem.o
+ .debug_str     0x0000bcc9      0x39d ./Core/Src/system_stm32f4xx.o
+ .debug_str     0x0000bcc9       0x92 ./Core/Startup/startup_stm32f407vgtx.o
+ .debug_str     0x0000bcc9      0xb8c ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
+ .debug_str     0x0000bcc9      0xc9d ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
+ .debug_str     0x0000bcc9      0x79e ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.o
+ .debug_str     0x0000bcc9      0x572 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.o
+ .debug_str     0x0000bcc9      0x5c2 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.o
+ .debug_str     0x0000bcc9      0x508 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
+ .debug_str     0x0000bcc9      0x71d ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
+ .debug_str     0x0000bcc9      0xc1c ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.o
+ .debug_str     0x0000bcc9     0x1727 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
+ .debug_str     0x0000bcc9      0xf33 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
+ .debug_str     0x0000bcc9      0xdb2 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
+ .debug_str     0x0000bcc9     0x21b6 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_str     0x0000bcc9      0x32a ./Middlewares/Third_Party/FreeRTOS/Source/list.o
+ .debug_str     0x0000bcc9      0xd2f ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
+ .debug_str     0x0000bcc9     0x130f ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ .debug_str     0x0000bcc9      0xc70 ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
+ .debug_str     0x0000bcc9      0x4aa ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
+ .debug_str     0x0000bcc9      0x543 ./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o
+ .debug_str     0x0000bcc9     0x2afa ./User/Src/Communication.o
+ .debug_str     0x0000bcc9     0x1ca6 ./User/Src/Emg.o
+ .debug_str     0x0000bcc9      0xf35 ./User/Src/Filter.o
+ .debug_str     0x0000bcc9     0x1b7b ./User/Src/FlashManager.o
+ .debug_str     0x0000bcc9     0x2146 ./User/Src/LoadCell.o
+ .debug_str     0x0000bcc9     0x3ab0 ./User/Src/SystemAdapter.o
 
 .comment        0x00000000       0x43
  .comment       0x00000000       0x43 ./Core/Src/freertos.o
