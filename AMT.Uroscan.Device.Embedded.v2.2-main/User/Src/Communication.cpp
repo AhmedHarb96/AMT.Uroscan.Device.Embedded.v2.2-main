@@ -559,6 +559,7 @@ void Communication::pauseTest(void){
 	ToggleSecondEmg(false);
 	ToggleLoadCell(false);
 	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_PauseTest, ProcessStatuses::PS_End);
+	vTaskDelay(100);
 }
 void Communication::cancelTest(void){
 	pauseFlg = false;
@@ -573,6 +574,7 @@ void Communication::cancelTest(void){
 	SystemConfig.PocketIndex=0;
 	SystemConfig.systemMode=SystemModes::EmptyMode;
 	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_CancelTest, ProcessStatuses::PS_End);
+	vTaskDelay(100);
     HAL_NVIC_SystemReset();
 }
 //*********************************  Manual Mode Functions **********************************//

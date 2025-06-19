@@ -25,9 +25,9 @@ typedef struct {
 typedef struct {
 
 	float32_t SumFirstVolumeMAFValue;
-	float32_t FirstVolumeMAFArray[20];
+	float32_t FirstVolumeMAFArray[50];  //60//20
 	uint16_t FirstVolumeMAFLength;
-	uint16_t Len=20;
+	uint16_t Len=25;   //50;  //50//60//20;
 	float PreviousHPFilteredValue;
 
 } VolumeFilterStruct;
@@ -38,7 +38,7 @@ typedef struct {
 
 	float32_t SumFirstFlowMAFValue;
 	float32_t FirstFlowMAFArray[40];
-	uint16_t Len=40;
+	uint16_t Len=40;         //7;    //40
 	uint8_t FirstFlowMAFLength;
 
 } FlowFilterStruct;

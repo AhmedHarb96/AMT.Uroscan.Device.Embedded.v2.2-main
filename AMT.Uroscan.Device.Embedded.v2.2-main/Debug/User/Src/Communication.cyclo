@@ -19,13 +19,13 @@
 ../User/Src/Communication.cpp:533:6:void Communication::StopTest(uint16_t)	1
 ../User/Src/Communication.cpp:548:6:void Communication::resumeTest()	1
 ../User/Src/Communication.cpp:555:6:void Communication::pauseTest()	1
-../User/Src/Communication.cpp:563:6:void Communication::cancelTest()	1
-../User/Src/Communication.cpp:579:6:void Communication::ManualPrep(uint16_t)	1
-../User/Src/Communication.cpp:585:6:void Communication::StartManTest(bool, bool, bool, uint16_t, uint8_t)	1
-../User/Src/Communication.cpp:599:6:void Communication::StartClean(uint16_t)	3
-../User/Src/Communication.cpp:613:6:void Communication::ToggleSafeMode(bool)	5
-../User/Src/Communication.cpp:634:6:void Communication::LoadcellAverage()	2
-../User/Src/Communication.cpp:644:6:void Communication::LoadcellVolumeCalibration(uint16_t)	2
-../User/Src/Communication.cpp:656:6:void Communication::LoadcellFlowCalibration(uint16_t)	2
+../User/Src/Communication.cpp:564:6:void Communication::cancelTest()	1
+../User/Src/Communication.cpp:581:6:void Communication::ManualPrep(uint16_t)	1
+../User/Src/Communication.cpp:587:6:void Communication::StartManTest(bool, bool, bool, uint16_t, uint8_t)	1
+../User/Src/Communication.cpp:601:6:void Communication::StartClean(uint16_t)	3
+../User/Src/Communication.cpp:615:6:void Communication::ToggleSafeMode(bool)	5
+../User/Src/Communication.cpp:636:6:void Communication::LoadcellAverage()	2
+../User/Src/Communication.cpp:646:6:void Communication::LoadcellVolumeCalibration(uint16_t)	2
+../User/Src/Communication.cpp:658:6:void Communication::LoadcellFlowCalibration(uint16_t)	2
 ../User/Src/../Inc/FlashManager.h:16:7:constexpr FlashManager& FlashManager::operator=(const FlashManager&)	1
-../User/Src/Communication.cpp:668:6:void Communication::SetFlashManager(FlashManager)	1
+../User/Src/Communication.cpp:670:6:void Communication::SetFlashManager(FlashManager)	1

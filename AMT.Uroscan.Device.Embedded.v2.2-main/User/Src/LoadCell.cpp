@@ -28,7 +28,7 @@ VolumeFilterStruct VolumeFilter;
 ConsecutiveLoadcellStruct ConsecutiveLoadcell;
 FlowFilterStruct FlowFilter;
 
-
+float32_t dependedFlow=0;
 
 
 LoadCell::LoadCell() {
@@ -81,12 +81,12 @@ void LoadCell::ReadVolumeAndFlow(void){
 		FlowValue=(65536-FlowValue);
 	}
 	Debugger.ReadedVolume=VolumeValue;
-	float32_t readedVolume=ExponantialSmoothingFilter(0.5, VolumeValue, LastReadVolumeValue);
-	LastReadVolumeValue=readedVolume;
+	//float32_t readedVolume=ExponantialSmoothingFilter(0.5, VolumeValue, LastReadVolumeValue);
+	LastReadVolumeValue=VolumeValue;
 
 	Debugger.ReadedFlow=FlowValue;
-	float32_t readedFlow=ExponantialSmoothingFilter(0.5, FlowValue, LastReadFlowValue);
-	LastReadFlowValue=readedFlow;
+	//float32_t readedFlow=ExponantialSmoothingFilter(0.5, FlowValue, LastReadFlowValue);
+	LastReadFlowValue=FlowValue;
 
 }
 void LoadCell::ReadVolume(bool useBuffer){
@@ -106,10 +106,15 @@ void LoadCell::ReadVolume(bool useBuffer){
 		VolumeValue = VolumeValue
 				+ readLoadCellValue[1] + (readLoadCellValue[0] << 8);
 	}
-	float32_t newVal=CalculateRealVolumeData(VolumeValue);
-	if(newVal<MaxVolumeValue){
-		newVal=MaxVolumeValue;
+	float32_t newVal=CalculateRealVolumeData(VolumeValue)-2; //-1
+	if(newVal<0){
+		newVal=0;
 	}
+	//if(dependedFlow==0) newVal=0;
+
+	/*if(newVal<MaxVolumeValue){   //
+		newVal=MaxVolumeValue;     //
+	}*/                            //
 	MaxVolumeValue=newVal;
 	Debugger.Volume=newVal;
 	if(useBuffer==false) return;
@@ -127,7 +132,7 @@ float32_t LoadCell::CalculateRealVolumeData(float32_t volume){
 	float32_t newVolume = 0;
 	float32_t movingVolumeData = 0;
 	Debugger.ReadedVolume=volume;
-	float32_t readedVolume=ExponantialSmoothingFilter(0.5, volume, LastReadVolumeValue);
+	float32_t readedVolume=ExponantialSmoothingFilter(0.45, volume, LastReadVolumeValue);  //0.5
 	LastReadVolumeValue=readedVolume;
 
 	VolumeFilter.FirstVolumeMAFLength++;
@@ -135,7 +140,7 @@ float32_t LoadCell::CalculateRealVolumeData(float32_t volume){
 			>= VolumeFilter.Len) {
 		VolumeFilter.FirstVolumeMAFLength = 0;
 	}
-	float32_t diff=readedVolume-SystemConfig.VolumeAverage;
+	float32_t diff=readedVolume-(SystemConfig.VolumeAverage);
 	if(diff<0){
 		diff=0;
 	}
@@ -146,8 +151,8 @@ float32_t LoadCell::CalculateRealVolumeData(float32_t volume){
 			&VolumeFilter.SumFirstVolumeMAFValue,
 			VolumeFilter.FirstVolumeMAFLength,VolumeFilter.Len , diff);
 	Debugger.MovingAverageVolumeValue=movingVolumeData;
-	float32_t newValue=movingVolumeData/SystemConfig.VolumeRate;
-	newVolume=ExponantialSmoothingFilter((newValue>10?0.5:0.85), newValue,LastVolumeValue);
+	float32_t newValue=movingVolumeData/(SystemConfig.VolumeRate); //+6
+	newVolume=ExponantialSmoothingFilter((newValue>10?0.45:0.85), newValue,LastVolumeValue); //0.5
 	if(newValue>5){
 		newVolume=ceil(newVolume);
 	}
@@ -184,7 +189,10 @@ void LoadCell::ReadFlow(bool useBuffer){
 	FlowValue = readLoadCellValue[1]
 			+ (readLoadCellValue[0] << 8);
 	FlowValue=(65536-FlowValue);
-	float32_t newVal=CalculateRealFlowData(FlowValue);
+	float32_t newVal=CalculateRealFlowData(FlowValue)-4.52;
+	if(newVal<0) newVal=0;
+    dependedFlow=newVal;
+
 	if(newVal>=SystemConfig.MinimumFlowSensiblity){
 		IsFirstHandle=true;
 		LastHandleProcessTime=StartTimerTicks;
@@ -206,10 +214,10 @@ float32_t LoadCell::CalculateRealFlowData(float32_t flow){
 	float32_t movingFlowData = 0;
 
 	Debugger.ReadedFlow=flow;
-	float32_t readedFlow=ExponantialSmoothingFilter(0.5, flow, LastReadFlowValue);
+	float32_t readedFlow=ExponantialSmoothingFilter(0.25, flow, LastReadFlowValue) + 100; //0,4
 	LastReadFlowValue=readedFlow;
 	FlowFilter.FirstFlowMAFLength++;
-	float32_t diffFlow=readedFlow-SystemConfig.FlowAverage;
+	float32_t diffFlow=readedFlow-(SystemConfig.FlowAverage-280);    //320 //270  //200
 	if(diffFlow<0){
 		diffFlow=0;
 	}
@@ -224,7 +232,7 @@ float32_t LoadCell::CalculateRealFlowData(float32_t flow){
 			FlowFilter.Len,
 			diffFlow);
 	float32_t newValue=movingFlowData/SystemConfig.FlowRate;
-	newFlow=ExponantialSmoothingFilter((newValue>4?0.5:0.85), newValue,LastFlowValue);
+	newFlow=(ExponantialSmoothingFilter((newValue>4?0.25:0.85), newValue,LastFlowValue))/1.1;  //1.25//0,5  //1.6 scale ==> flow 13 max
 	if(newFlow<1.5){
 		newFlow=0;
 	}
