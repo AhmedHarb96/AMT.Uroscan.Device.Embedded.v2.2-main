@@ -34,6 +34,7 @@ void Communication::ProcessCommand(uint8_t *command){
 	}
 }
 bool pauseFlg = false;//***//
+bool CleanDone = false;
 void Communication::System(uint8_t *command){
 	if(command[0]!=RequestType::R_System) return;
 	uint16_t calibrationWeight = 500;
@@ -84,14 +85,16 @@ void Communication::System(uint8_t *command){
 			break;
 	 }
 }
-
+bool isOpenFirstEmg;
+bool isOpenSecondEmg;
+bool isOpenLoadcell;
 void Communication::Command(uint8_t *command){
 
 	uint16_t cleanTime=0;
 	if(command[0]!=RequestType::R_Command) return;
-    bool isOpenFirstEmg = command[2] & 0x04;
-    bool isOpenSecondEmg = command[2] & 0x02;
-    bool isOpenLoadcell = command[2] & 0x01;
+    isOpenFirstEmg = command[2] & 0x04;
+    isOpenSecondEmg = command[2] & 0x02;
+    isOpenLoadcell = command[2] & 0x01;
 	switch (command[1])   												//Check Function
 	{
 		case CommandRequestType::CMDR_FirstEmg:
@@ -277,8 +280,10 @@ void Communication::Command(uint8_t *command){
 			ManualPrep(cleanTime);
 			break;
 		case CommandRequestType::CMDR_StartManTest:
-			cleanTime=(command[3]<<8)+command[4];  //0;
-			StartManTest(isOpenFirstEmg, isOpenSecondEmg, isOpenLoadcell,cleanTime,command[7]);
+			if(CleanDone){
+				cleanTime=(command[3]<<8)+command[4];  //0;
+				StartManTest(isOpenFirstEmg, isOpenSecondEmg, isOpenLoadcell,cleanTime,command[7]);
+			}
 			break;
 
 		default:
@@ -546,18 +551,19 @@ void Communication::StopTest(uint16_t cleanTime){
 
 //**************************************** Resume/Pause FNs *******************************************//
 void Communication::resumeTest(void){
-	ToggleFirstEmg(true);
-	ToggleSecondEmg(true);
-	ToggleLoadCell(true);
+	if(isOpenFirstEmg) ToggleFirstEmg(true);
+	if(isOpenSecondEmg) ToggleSecondEmg(true);
+	//ToggleLoadCell(true);  // //250721
 	ToggleDataStream(true);
 	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_ResumeTest, ProcessStatuses::PS_End);
 }
 void Communication::pauseTest(void){
 	pauseFlg = true;
+
+	if(isOpenFirstEmg) ToggleFirstEmg(false);
+	if(isOpenSecondEmg) ToggleSecondEmg(false);
+	//ToggleLoadCell(false); // //250721
 	ToggleDataStream(false);
-	ToggleFirstEmg(false);
-	ToggleSecondEmg(false);
-	ToggleLoadCell(false);
 	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_PauseTest, ProcessStatuses::PS_End);
 	vTaskDelay(100);
 }
@@ -582,10 +588,12 @@ void Communication::ManualPrep(uint16_t cleanTime){
 	SystemConfig.CleanTime=cleanTime;
 	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManPrep, ProcessStatuses::PS_Processing);
 	StartCleanTask(NULL);
+	CleanDone = true;
 	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManPrep, ProcessStatuses::PS_End);
 }
 void Communication::StartManTest(bool isStartFirstEmg,bool isStartSecondEmg,bool isStartLoadcell,uint16_t cleanTime,uint8_t startHandleSeconds){
 	SystemConfig.CleanTime=cleanTime;
+	CleanDone = false;
 	//StartCleanTask(NULL);
 	FixVolume();
 	ToggleFirstEmg(isStartFirstEmg);

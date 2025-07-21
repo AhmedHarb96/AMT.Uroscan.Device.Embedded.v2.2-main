@@ -2,30 +2,30 @@
 ../User/Src/Communication.cpp:16:1:Communication::~Communication()	1
 ../User/Src/Communication.cpp:16:1:virtual Communication::~Communication()	1
 ../User/Src/Communication.cpp:20:6:void Communication::ProcessCommand(uint8_t*)	5
-../User/Src/Communication.cpp:37:6:void Communication::System(uint8_t*)	16
-../User/Src/Communication.cpp:88:6:void Communication::Command(uint8_t*)	70
-../User/Src/Communication.cpp:291:6:void Communication::Configuration(uint8_t*)	18
-../User/Src/Communication.cpp:380:6:void Communication::ToggleFirstEmg(bool)	3
-../User/Src/Communication.cpp:390:6:void Communication::ToggleSecondEmg(bool)	3
-../User/Src/Communication.cpp:400:6:void Communication::ToggleLoadCell(bool)	5
-../User/Src/Communication.cpp:420:6:void Communication::ToggleReadVolume(bool)	4
-../User/Src/Communication.cpp:436:6:void Communication::ToggleReadFlow(bool)	4
-../User/Src/Communication.cpp:452:6:void Communication::ToggleReadFirstEmg(bool)	4
-../User/Src/Communication.cpp:466:6:void Communication::ToggleReadSecondEmg(bool)	4
-../User/Src/Communication.cpp:480:6:void Communication::TogglePump(bool)	3
-../User/Src/Communication.cpp:494:6:void Communication::ToggleValve(bool)	3
-../User/Src/Communication.cpp:506:6:void Communication::ToggleDataStream(bool)	5
-../User/Src/Communication.cpp:520:6:void Communication::StartTest(bool, bool, bool, uint16_t, uint8_t)	1
-../User/Src/Communication.cpp:533:6:void Communication::StopTest(uint16_t)	1
-../User/Src/Communication.cpp:548:6:void Communication::resumeTest()	1
-../User/Src/Communication.cpp:555:6:void Communication::pauseTest()	1
-../User/Src/Communication.cpp:564:6:void Communication::cancelTest()	1
-../User/Src/Communication.cpp:581:6:void Communication::ManualPrep(uint16_t)	1
-../User/Src/Communication.cpp:587:6:void Communication::StartManTest(bool, bool, bool, uint16_t, uint8_t)	1
-../User/Src/Communication.cpp:601:6:void Communication::StartClean(uint16_t)	3
-../User/Src/Communication.cpp:615:6:void Communication::ToggleSafeMode(bool)	5
-../User/Src/Communication.cpp:636:6:void Communication::LoadcellAverage()	2
-../User/Src/Communication.cpp:646:6:void Communication::LoadcellVolumeCalibration(uint16_t)	2
-../User/Src/Communication.cpp:658:6:void Communication::LoadcellFlowCalibration(uint16_t)	2
+../User/Src/Communication.cpp:38:6:void Communication::System(uint8_t*)	16
+../User/Src/Communication.cpp:91:6:void Communication::Command(uint8_t*)	71
+../User/Src/Communication.cpp:296:6:void Communication::Configuration(uint8_t*)	18
+../User/Src/Communication.cpp:385:6:void Communication::ToggleFirstEmg(bool)	3
+../User/Src/Communication.cpp:395:6:void Communication::ToggleSecondEmg(bool)	3
+../User/Src/Communication.cpp:405:6:void Communication::ToggleLoadCell(bool)	5
+../User/Src/Communication.cpp:425:6:void Communication::ToggleReadVolume(bool)	4
+../User/Src/Communication.cpp:441:6:void Communication::ToggleReadFlow(bool)	4
+../User/Src/Communication.cpp:457:6:void Communication::ToggleReadFirstEmg(bool)	4
+../User/Src/Communication.cpp:471:6:void Communication::ToggleReadSecondEmg(bool)	4
+../User/Src/Communication.cpp:485:6:void Communication::TogglePump(bool)	3
+../User/Src/Communication.cpp:499:6:void Communication::ToggleValve(bool)	3
+../User/Src/Communication.cpp:511:6:void Communication::ToggleDataStream(bool)	5
+../User/Src/Communication.cpp:525:6:void Communication::StartTest(bool, bool, bool, uint16_t, uint8_t)	1
+../User/Src/Communication.cpp:538:6:void Communication::StopTest(uint16_t)	1
+../User/Src/Communication.cpp:553:6:void Communication::resumeTest()	3
+../User/Src/Communication.cpp:560:6:void Communication::pauseTest()	3
+../User/Src/Communication.cpp:570:6:void Communication::cancelTest()	1
+../User/Src/Communication.cpp:587:6:void Communication::ManualPrep(uint16_t)	1
+../User/Src/Communication.cpp:594:6:void Communication::StartManTest(bool, bool, bool, uint16_t, uint8_t)	1
+../User/Src/Communication.cpp:609:6:void Communication::StartClean(uint16_t)	3
+../User/Src/Communication.cpp:623:6:void Communication::ToggleSafeMode(bool)	5
+../User/Src/Communication.cpp:644:6:void Communication::LoadcellAverage()	2
+../User/Src/Communication.cpp:654:6:void Communication::LoadcellVolumeCalibration(uint16_t)	2
+../User/Src/Communication.cpp:666:6:void Communication::LoadcellFlowCalibration(uint16_t)	2
 ../User/Src/../Inc/FlashManager.h:16:7:constexpr FlashManager& FlashManager::operator=(const FlashManager&)	1
-../User/Src/Communication.cpp:670:6:void Communication::SetFlashManager(FlashManager)	1
+../User/Src/Communication.cpp:678:6:void Communication::SetFlashManager(FlashManager)	1

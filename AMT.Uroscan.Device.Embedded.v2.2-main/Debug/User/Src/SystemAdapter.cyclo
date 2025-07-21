@@ -36,6 +36,7 @@
 ../User/Src/SystemAdapter.cpp:1018:9:uint8_t HasLoadcell(bool)	3
 ../User/Src/SystemAdapter.cpp:1028:9:uint8_t HasFirstEmg(bool)	4
 ../User/Src/SystemAdapter.cpp:1038:9:uint8_t HasSecondEmg(bool)	4
-../User/Src/SystemAdapter.cpp:1046:1:void __static_initialization_and_destruction_0(int, int)	5
+../User/Src/SystemAdapter.cpp:1046:1:void __static_initialization_and_destruction_0()	1
+../User/Src/SystemAdapter.cpp:1046:1:void __static_initialization_and_destruction_1()	1
 ../User/Src/SystemAdapter.cpp:1046:1:cpp)	1
 ../User/Src/SystemAdapter.cpp:1046:1:cpp)	1
