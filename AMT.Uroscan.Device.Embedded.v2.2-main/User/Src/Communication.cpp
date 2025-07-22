@@ -280,7 +280,8 @@ void Communication::Command(uint8_t *command){
 			ManualPrep(cleanTime);
 			break;
 		case CommandRequestType::CMDR_StartManTest:
-			if(CleanDone){
+			//if(CleanDone)
+			{
 				cleanTime=(command[3]<<8)+command[4];  //0;
 				StartManTest(isOpenFirstEmg, isOpenSecondEmg, isOpenLoadcell,cleanTime,command[7]);
 			}
@@ -589,21 +590,27 @@ void Communication::ManualPrep(uint16_t cleanTime){
 	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManPrep, ProcessStatuses::PS_Processing);
 	StartCleanTask(NULL);
 	CleanDone = true;
-	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManPrep, ProcessStatuses::PS_End);
+	//SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManPrep, ProcessStatuses::PS_End);
+	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_CleanDone, ProcessStatuses::PS_End);
 }
 void Communication::StartManTest(bool isStartFirstEmg,bool isStartSecondEmg,bool isStartLoadcell,uint16_t cleanTime,uint8_t startHandleSeconds){
 	SystemConfig.CleanTime=cleanTime;
-	CleanDone = false;
-	//StartCleanTask(NULL);
-	FixVolume();
-	ToggleFirstEmg(isStartFirstEmg);
-	ToggleSecondEmg(isStartSecondEmg);
-	ToggleLoadCell(isStartLoadcell);
-	SystemConfig.StartHandleSeconds=startHandleSeconds;
-	ToggleDataStream(true);
-	SystemConfig.PocketIndex=0;
-	SystemConfig.systemMode=SystemModes::TestMode;
-	SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManTest, ProcessStatuses::PS_End);
+	if(CleanDone){
+		CleanDone = false;
+		//StartCleanTask(NULL);
+		FixVolume();
+		ToggleFirstEmg(isStartFirstEmg);
+		ToggleSecondEmg(isStartSecondEmg);
+		ToggleLoadCell(isStartLoadcell);
+		SystemConfig.StartHandleSeconds=startHandleSeconds;
+		ToggleDataStream(true);
+		SystemConfig.PocketIndex=0;
+		SystemConfig.systemMode=SystemModes::TestMode;
+		SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManTest, ProcessStatuses::PS_End);
+	}
+	/*else{
+		SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StartManPrep, ProcessStatuses::PS_Processing);
+	}*/
 }
 //******************************************************************************************//
 void Communication::StartClean(uint16_t cleanTime){

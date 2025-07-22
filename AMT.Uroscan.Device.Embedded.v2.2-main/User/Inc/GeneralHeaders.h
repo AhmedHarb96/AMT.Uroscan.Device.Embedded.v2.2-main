@@ -159,6 +159,7 @@ enum CommandRequestType{
 
 	CMDR_StartManPrep=0x1A,
 	CMDR_StartManTest=0x1B,
+	CMDR_CleanDone=0x1C,
 
 	CMDR_StopTest=0xFD,
 	CMDR_StartTest=0xFF

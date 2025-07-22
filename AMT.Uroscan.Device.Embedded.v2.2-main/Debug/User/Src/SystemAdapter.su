@@ -1,4 +1,4 @@
-../User/Src/../Inc/GeneralHeaders.h:285:3:SystemConfigStruct::SystemConfigStruct()	16	static
+../User/Src/../Inc/GeneralHeaders.h:286:3:SystemConfigStruct::SystemConfigStruct()	16	static
 ../User/Src/../Inc/FlashManager.h:16:7:constexpr FlashManager::FlashManager(const FlashManager&)	16	static
 ../User/Src/SystemAdapter.cpp:59:6:void SetupOS()	40	static
 ../User/Src/SystemAdapter.cpp:68:6:void UpdatePriority()	8	static
