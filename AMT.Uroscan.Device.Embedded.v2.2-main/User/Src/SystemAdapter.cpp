@@ -626,7 +626,7 @@ void StartReadFlowTask(void *argument)
 			float32_t rate=SystemConfig.FlowRate;
 			uint8_t *rateArray;
 			rateArray = (uint8_t*)(&rate );
-			float32_t flow=LoadCellInstance.LastReadFlowValue;
+			float32_t flow=Debugger.LastFlow;//LoadCellInstance.LastReadFlowValue; //250926
 			uint8_t *flowArray;
 			flowArray = (uint8_t*)(&flow );
 			data[4]=rateArray[0];
@@ -697,7 +697,7 @@ void StartReadVolumeTask(void *argument)
 			float32_t rate=SystemConfig.VolumeRate;
 			uint8_t *rateArray;
 			rateArray = (uint8_t*)(&rate );
-			float32_t volume=LoadCellInstance.LastReadVolumeValue;
+			float32_t volume=Debugger.LastVolume;//LoadCellInstance.LastReadVolumeValue; //250926
 			uint8_t *volumeArray;
 			volumeArray = (uint8_t*)(&volume );
 			data[4]=rateArray[0];

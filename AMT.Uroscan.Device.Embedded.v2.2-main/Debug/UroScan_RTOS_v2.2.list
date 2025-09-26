@@ -35,17 +35,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_aranges 00001e10  00000000  00000000  00043880  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_line   0001a895  00000000  00000000  00045690  2**0
+ 16 .debug_line   0001a899  00000000  00000000  00045690  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_str    0000bcb4  00000000  00000000  0005ff25  2**0
+ 17 .debug_str    0000bcb4  00000000  00000000  0005ff29  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .comment      00000043  00000000  00000000  0006bbd9  2**0
+ 18 .comment      00000043  00000000  00000000  0006bbdd  2**0
                   CONTENTS, READONLY
- 19 .debug_rnglists 0000174e  00000000  00000000  0006bc1c  2**0
+ 19 .debug_rnglists 0000174e  00000000  00000000  0006bc20  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00008a4c  00000000  00000000  0006d36c  2**2
+ 20 .debug_frame  00008a4c  00000000  00000000  0006d370  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000093  00000000  00000000  00075db8  2**0
+ 21 .debug_line_str 00000093  00000000  00000000  00075dbc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -39848,26 +39848,26 @@ void StartReadFlowTask(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 	LoadCellInstance.ClearSamples();
- 800fd00:	4838      	ldr	r0, [pc, #224]	@ (800fde4 <StartReadFlowTask+0xec>)
+ 800fd00:	4837      	ldr	r0, [pc, #220]	@ (800fde0 <StartReadFlowTask+0xe8>)
  800fd02:	f7fe fc7f 	bl	800e604 <_ZN8LoadCell12ClearSamplesEv>
 	const TickType_t xDelay = (1000/SystemConfig.FlowPerSecond) / portTICK_PERIOD_MS;
- 800fd06:	4b38      	ldr	r3, [pc, #224]	@ (800fde8 <StartReadFlowTask+0xf0>)
+ 800fd06:	4b37      	ldr	r3, [pc, #220]	@ (800fde4 <StartReadFlowTask+0xec>)
  800fd08:	791b      	ldrb	r3, [r3, #4]
  800fd0a:	461a      	mov	r2, r3
  800fd0c:	f44f 737a 	mov.w	r3, #1000	@ 0x3e8
  800fd10:	fb93 f3f2 	sdiv	r3, r3, r2
  800fd14:	637b      	str	r3, [r7, #52]	@ 0x34
 	ThreadStorage.FlowSemaphoreHandle = osSemaphoreNew(1, 1, &flowSemaphore_attributes);
- 800fd16:	4a35      	ldr	r2, [pc, #212]	@ (800fdec <StartReadFlowTask+0xf4>)
+ 800fd16:	4a34      	ldr	r2, [pc, #208]	@ (800fde8 <StartReadFlowTask+0xf0>)
  800fd18:	2101      	movs	r1, #1
  800fd1a:	2001      	movs	r0, #1
  800fd1c:	f7f6 feb3 	bl	8006a86 <osSemaphoreNew>
  800fd20:	4603      	mov	r3, r0
- 800fd22:	4a33      	ldr	r2, [pc, #204]	@ (800fdf0 <StartReadFlowTask+0xf8>)
+ 800fd22:	4a32      	ldr	r2, [pc, #200]	@ (800fdec <StartReadFlowTask+0xf4>)
  800fd24:	f8c2 31d8 	str.w	r3, [r2, #472]	@ 0x1d8
 	osStatus_t flowSemaphoreVal;
 	float32_t avg=SystemConfig.FlowAverage;
- 800fd28:	4b2f      	ldr	r3, [pc, #188]	@ (800fde8 <StartReadFlowTask+0xf0>)
+ 800fd28:	4b2e      	ldr	r3, [pc, #184]	@ (800fde4 <StartReadFlowTask+0xec>)
  800fd2a:	695b      	ldr	r3, [r3, #20]
  800fd2c:	ee07 3a90 	vmov	s15, r3
  800fd30:	eef8 7a67 	vcvt.f32.u32	s15, s15
@@ -39896,7 +39896,7 @@ void StartReadFlowTask(void *argument)
 	for(;;)
 	{
 		flowSemaphoreVal = osSemaphoreAcquire(ThreadStorage.FlowSemaphoreHandle, 1000);
- 800fd56:	4b26      	ldr	r3, [pc, #152]	@ (800fdf0 <StartReadFlowTask+0xf8>)
+ 800fd56:	4b25      	ldr	r3, [pc, #148]	@ (800fdec <StartReadFlowTask+0xf4>)
  800fd58:	f8d3 31d8 	ldr.w	r3, [r3, #472]	@ 0x1d8
  800fd5c:	f44f 717a 	mov.w	r1, #1000	@ 0x3e8
  800fd60:	4618      	mov	r0, r3
@@ -39905,81 +39905,81 @@ void StartReadFlowTask(void *argument)
 		if(flowSemaphoreVal==osOK){
  800fd68:	6afb      	ldr	r3, [r7, #44]	@ 0x2c
  800fd6a:	2b00      	cmp	r3, #0
- 800fd6c:	d136      	bne.n	800fddc <StartReadFlowTask+0xe4>
+ 800fd6c:	d134      	bne.n	800fdd8 <StartReadFlowTask+0xe0>
 			LoadCellInstance.ReadFlow(false);
  800fd6e:	2100      	movs	r1, #0
- 800fd70:	481c      	ldr	r0, [pc, #112]	@ (800fde4 <StartReadFlowTask+0xec>)
+ 800fd70:	481b      	ldr	r0, [pc, #108]	@ (800fde0 <StartReadFlowTask+0xe8>)
  800fd72:	f7fe f935 	bl	800dfe0 <_ZN8LoadCell8ReadFlowEb>
 			float32_t rate=SystemConfig.FlowRate;
- 800fd76:	4b1c      	ldr	r3, [pc, #112]	@ (800fde8 <StartReadFlowTask+0xf0>)
+ 800fd76:	4b1b      	ldr	r3, [pc, #108]	@ (800fde4 <StartReadFlowTask+0xec>)
  800fd78:	6a1b      	ldr	r3, [r3, #32]
  800fd7a:	613b      	str	r3, [r7, #16]
 			uint8_t *rateArray;
 			rateArray = (uint8_t*)(&rate );
  800fd7c:	f107 0310 	add.w	r3, r7, #16
  800fd80:	62bb      	str	r3, [r7, #40]	@ 0x28
-			float32_t flow=LoadCellInstance.LastReadFlowValue;
- 800fd82:	4b18      	ldr	r3, [pc, #96]	@ (800fde4 <StartReadFlowTask+0xec>)
- 800fd84:	f503 5300 	add.w	r3, r3, #8192	@ 0x2000
- 800fd88:	69db      	ldr	r3, [r3, #28]
- 800fd8a:	60fb      	str	r3, [r7, #12]
+			float32_t flow=Debugger.LastFlow;//LoadCellInstance.LastReadFlowValue; //250926
+ 800fd82:	4b1b      	ldr	r3, [pc, #108]	@ (800fdf0 <StartReadFlowTask+0xf8>)
+ 800fd84:	69db      	ldr	r3, [r3, #28]
+ 800fd86:	60fb      	str	r3, [r7, #12]
 			uint8_t *flowArray;
 			flowArray = (uint8_t*)(&flow );
- 800fd8c:	f107 030c 	add.w	r3, r7, #12
- 800fd90:	627b      	str	r3, [r7, #36]	@ 0x24
+ 800fd88:	f107 030c 	add.w	r3, r7, #12
+ 800fd8c:	627b      	str	r3, [r7, #36]	@ 0x24
 			data[4]=rateArray[0];
- 800fd92:	6abb      	ldr	r3, [r7, #40]	@ 0x28
- 800fd94:	781b      	ldrb	r3, [r3, #0]
- 800fd96:	763b      	strb	r3, [r7, #24]
+ 800fd8e:	6abb      	ldr	r3, [r7, #40]	@ 0x28
+ 800fd90:	781b      	ldrb	r3, [r3, #0]
+ 800fd92:	763b      	strb	r3, [r7, #24]
 			data[5]=rateArray[1];
- 800fd98:	6abb      	ldr	r3, [r7, #40]	@ 0x28
- 800fd9a:	785b      	ldrb	r3, [r3, #1]
- 800fd9c:	767b      	strb	r3, [r7, #25]
+ 800fd94:	6abb      	ldr	r3, [r7, #40]	@ 0x28
+ 800fd96:	785b      	ldrb	r3, [r3, #1]
+ 800fd98:	767b      	strb	r3, [r7, #25]
 			data[6]=rateArray[2];
- 800fd9e:	6abb      	ldr	r3, [r7, #40]	@ 0x28
- 800fda0:	789b      	ldrb	r3, [r3, #2]
- 800fda2:	76bb      	strb	r3, [r7, #26]
+ 800fd9a:	6abb      	ldr	r3, [r7, #40]	@ 0x28
+ 800fd9c:	789b      	ldrb	r3, [r3, #2]
+ 800fd9e:	76bb      	strb	r3, [r7, #26]
 			data[7]=rateArray[3];
- 800fda4:	6abb      	ldr	r3, [r7, #40]	@ 0x28
- 800fda6:	78db      	ldrb	r3, [r3, #3]
- 800fda8:	76fb      	strb	r3, [r7, #27]
+ 800fda0:	6abb      	ldr	r3, [r7, #40]	@ 0x28
+ 800fda2:	78db      	ldrb	r3, [r3, #3]
+ 800fda4:	76fb      	strb	r3, [r7, #27]
 			data[8]=flowArray[0];
- 800fdaa:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
- 800fdac:	781b      	ldrb	r3, [r3, #0]
- 800fdae:	773b      	strb	r3, [r7, #28]
+ 800fda6:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
+ 800fda8:	781b      	ldrb	r3, [r3, #0]
+ 800fdaa:	773b      	strb	r3, [r7, #28]
 			data[9]=flowArray[1];
- 800fdb0:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
- 800fdb2:	785b      	ldrb	r3, [r3, #1]
- 800fdb4:	777b      	strb	r3, [r7, #29]
+ 800fdac:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
+ 800fdae:	785b      	ldrb	r3, [r3, #1]
+ 800fdb0:	777b      	strb	r3, [r7, #29]
 			data[10]=flowArray[2];
- 800fdb6:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
- 800fdb8:	789b      	ldrb	r3, [r3, #2]
- 800fdba:	77bb      	strb	r3, [r7, #30]
+ 800fdb2:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
+ 800fdb4:	789b      	ldrb	r3, [r3, #2]
+ 800fdb6:	77bb      	strb	r3, [r7, #30]
 			data[11]=flowArray[3];
- 800fdbc:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
- 800fdbe:	78db      	ldrb	r3, [r3, #3]
- 800fdc0:	77fb      	strb	r3, [r7, #31]
+ 800fdb8:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
+ 800fdba:	78db      	ldrb	r3, [r3, #3]
+ 800fdbc:	77fb      	strb	r3, [r7, #31]
 			SuccessDataResult(0, SuccessDataType::SD_Flow, data, 12);
- 800fdc2:	f107 0214 	add.w	r2, r7, #20
- 800fdc6:	230c      	movs	r3, #12
- 800fdc8:	2105      	movs	r1, #5
- 800fdca:	2000      	movs	r0, #0
- 800fdcc:	f7fe ffba 	bl	800ed44 <SuccessDataResult>
+ 800fdbe:	f107 0214 	add.w	r2, r7, #20
+ 800fdc2:	230c      	movs	r3, #12
+ 800fdc4:	2105      	movs	r1, #5
+ 800fdc6:	2000      	movs	r0, #0
+ 800fdc8:	f7fe ffbc 	bl	800ed44 <SuccessDataResult>
 			osSemaphoreRelease(ThreadStorage.FlowSemaphoreHandle);
- 800fdd0:	4b07      	ldr	r3, [pc, #28]	@ (800fdf0 <StartReadFlowTask+0xf8>)
- 800fdd2:	f8d3 31d8 	ldr.w	r3, [r3, #472]	@ 0x1d8
- 800fdd6:	4618      	mov	r0, r3
- 800fdd8:	f7f6 ff30 	bl	8006c3c <osSemaphoreRelease>
+ 800fdcc:	4b07      	ldr	r3, [pc, #28]	@ (800fdec <StartReadFlowTask+0xf4>)
+ 800fdce:	f8d3 31d8 	ldr.w	r3, [r3, #472]	@ 0x1d8
+ 800fdd2:	4618      	mov	r0, r3
+ 800fdd4:	f7f6 ff32 	bl	8006c3c <osSemaphoreRelease>
 		}
 		vTaskDelay( xDelay );
- 800fddc:	6b78      	ldr	r0, [r7, #52]	@ 0x34
- 800fdde:	f7f8 fb1f 	bl	8008420 <vTaskDelay>
+ 800fdd8:	6b78      	ldr	r0, [r7, #52]	@ 0x34
+ 800fdda:	f7f8 fb21 	bl	8008420 <vTaskDelay>
 	}
- 800fde2:	e7b8      	b.n	800fd56 <StartReadFlowTask+0x5e>
- 800fde4:	200070c8 	.word	0x200070c8
- 800fde8:	2000932c 	.word	0x2000932c
- 800fdec:	08011d6c 	.word	0x08011d6c
- 800fdf0:	2000913c 	.word	0x2000913c
+ 800fdde:	e7ba      	b.n	800fd56 <StartReadFlowTask+0x5e>
+ 800fde0:	200070c8 	.word	0x200070c8
+ 800fde4:	2000932c 	.word	0x2000932c
+ 800fde8:	08011d6c 	.word	0x08011d6c
+ 800fdec:	2000913c 	.word	0x2000913c
+ 800fdf0:	200093a8 	.word	0x200093a8
 
 0800fdf4 <StartVolumeTask>:
   * @param  argument: Not used
@@ -40067,26 +40067,26 @@ void StartReadVolumeTask(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 	LoadCellInstance.ClearSamples();
- 800fe80:	4838      	ldr	r0, [pc, #224]	@ (800ff64 <StartReadVolumeTask+0xec>)
+ 800fe80:	4837      	ldr	r0, [pc, #220]	@ (800ff60 <StartReadVolumeTask+0xe8>)
  800fe82:	f7fe fbbf 	bl	800e604 <_ZN8LoadCell12ClearSamplesEv>
 	const TickType_t xDelay = (1000/SystemConfig.VolumePerSecond) / portTICK_PERIOD_MS;
- 800fe86:	4b38      	ldr	r3, [pc, #224]	@ (800ff68 <StartReadVolumeTask+0xf0>)
+ 800fe86:	4b37      	ldr	r3, [pc, #220]	@ (800ff64 <StartReadVolumeTask+0xec>)
  800fe88:	78db      	ldrb	r3, [r3, #3]
  800fe8a:	461a      	mov	r2, r3
  800fe8c:	f44f 737a 	mov.w	r3, #1000	@ 0x3e8
  800fe90:	fb93 f3f2 	sdiv	r3, r3, r2
  800fe94:	637b      	str	r3, [r7, #52]	@ 0x34
 	ThreadStorage.VolumeSemaphoreHandle = osSemaphoreNew(1, 1, &volumeSemaphore_attributes);
- 800fe96:	4a35      	ldr	r2, [pc, #212]	@ (800ff6c <StartReadVolumeTask+0xf4>)
+ 800fe96:	4a34      	ldr	r2, [pc, #208]	@ (800ff68 <StartReadVolumeTask+0xf0>)
  800fe98:	2101      	movs	r1, #1
  800fe9a:	2001      	movs	r0, #1
  800fe9c:	f7f6 fdf3 	bl	8006a86 <osSemaphoreNew>
  800fea0:	4603      	mov	r3, r0
- 800fea2:	4a33      	ldr	r2, [pc, #204]	@ (800ff70 <StartReadVolumeTask+0xf8>)
+ 800fea2:	4a32      	ldr	r2, [pc, #200]	@ (800ff6c <StartReadVolumeTask+0xf4>)
  800fea4:	f8c2 31dc 	str.w	r3, [r2, #476]	@ 0x1dc
 	osStatus_t volumeSemaphoreVal;
 	float32_t avg=SystemConfig.VolumeAverage;
- 800fea8:	4b2f      	ldr	r3, [pc, #188]	@ (800ff68 <StartReadVolumeTask+0xf0>)
+ 800fea8:	4b2e      	ldr	r3, [pc, #184]	@ (800ff64 <StartReadVolumeTask+0xec>)
  800feaa:	699b      	ldr	r3, [r3, #24]
  800feac:	ee07 3a90 	vmov	s15, r3
  800feb0:	eef8 7a67 	vcvt.f32.u32	s15, s15
@@ -40115,7 +40115,7 @@ void StartReadVolumeTask(void *argument)
 	for(;;)
 	{
 		volumeSemaphoreVal = osSemaphoreAcquire(ThreadStorage.VolumeSemaphoreHandle, 1000);
- 800fed6:	4b26      	ldr	r3, [pc, #152]	@ (800ff70 <StartReadVolumeTask+0xf8>)
+ 800fed6:	4b25      	ldr	r3, [pc, #148]	@ (800ff6c <StartReadVolumeTask+0xf4>)
  800fed8:	f8d3 31dc 	ldr.w	r3, [r3, #476]	@ 0x1dc
  800fedc:	f44f 717a 	mov.w	r1, #1000	@ 0x3e8
  800fee0:	4618      	mov	r0, r3
@@ -40124,81 +40124,81 @@ void StartReadVolumeTask(void *argument)
 		if(volumeSemaphoreVal==osOK){
  800fee8:	6afb      	ldr	r3, [r7, #44]	@ 0x2c
  800feea:	2b00      	cmp	r3, #0
- 800feec:	d136      	bne.n	800ff5c <StartReadVolumeTask+0xe4>
+ 800feec:	d134      	bne.n	800ff58 <StartReadVolumeTask+0xe0>
 			LoadCellInstance.ReadVolume(false);
  800feee:	2100      	movs	r1, #0
- 800fef0:	481c      	ldr	r0, [pc, #112]	@ (800ff64 <StartReadVolumeTask+0xec>)
+ 800fef0:	481b      	ldr	r0, [pc, #108]	@ (800ff60 <StartReadVolumeTask+0xe8>)
  800fef2:	f7fd febd 	bl	800dc70 <_ZN8LoadCell10ReadVolumeEb>
 			float32_t rate=SystemConfig.VolumeRate;
- 800fef6:	4b1c      	ldr	r3, [pc, #112]	@ (800ff68 <StartReadVolumeTask+0xf0>)
+ 800fef6:	4b1b      	ldr	r3, [pc, #108]	@ (800ff64 <StartReadVolumeTask+0xec>)
  800fef8:	69db      	ldr	r3, [r3, #28]
  800fefa:	613b      	str	r3, [r7, #16]
 			uint8_t *rateArray;
 			rateArray = (uint8_t*)(&rate );
  800fefc:	f107 0310 	add.w	r3, r7, #16
  800ff00:	62bb      	str	r3, [r7, #40]	@ 0x28
-			float32_t volume=LoadCellInstance.LastReadVolumeValue;
- 800ff02:	4b18      	ldr	r3, [pc, #96]	@ (800ff64 <StartReadVolumeTask+0xec>)
- 800ff04:	f503 5300 	add.w	r3, r3, #8192	@ 0x2000
- 800ff08:	6a1b      	ldr	r3, [r3, #32]
- 800ff0a:	60fb      	str	r3, [r7, #12]
+			float32_t volume=Debugger.LastVolume;//LoadCellInstance.LastReadVolumeValue; //250926
+ 800ff02:	4b1b      	ldr	r3, [pc, #108]	@ (800ff70 <StartReadVolumeTask+0xf8>)
+ 800ff04:	699b      	ldr	r3, [r3, #24]
+ 800ff06:	60fb      	str	r3, [r7, #12]
 			uint8_t *volumeArray;
 			volumeArray = (uint8_t*)(&volume );
- 800ff0c:	f107 030c 	add.w	r3, r7, #12
- 800ff10:	627b      	str	r3, [r7, #36]	@ 0x24
+ 800ff08:	f107 030c 	add.w	r3, r7, #12
+ 800ff0c:	627b      	str	r3, [r7, #36]	@ 0x24
 			data[4]=rateArray[0];
- 800ff12:	6abb      	ldr	r3, [r7, #40]	@ 0x28
- 800ff14:	781b      	ldrb	r3, [r3, #0]
- 800ff16:	763b      	strb	r3, [r7, #24]
+ 800ff0e:	6abb      	ldr	r3, [r7, #40]	@ 0x28
+ 800ff10:	781b      	ldrb	r3, [r3, #0]
+ 800ff12:	763b      	strb	r3, [r7, #24]
 			data[5]=rateArray[1];
- 800ff18:	6abb      	ldr	r3, [r7, #40]	@ 0x28
- 800ff1a:	785b      	ldrb	r3, [r3, #1]
- 800ff1c:	767b      	strb	r3, [r7, #25]
+ 800ff14:	6abb      	ldr	r3, [r7, #40]	@ 0x28
+ 800ff16:	785b      	ldrb	r3, [r3, #1]
+ 800ff18:	767b      	strb	r3, [r7, #25]
 			data[6]=rateArray[2];
- 800ff1e:	6abb      	ldr	r3, [r7, #40]	@ 0x28
- 800ff20:	789b      	ldrb	r3, [r3, #2]
- 800ff22:	76bb      	strb	r3, [r7, #26]
+ 800ff1a:	6abb      	ldr	r3, [r7, #40]	@ 0x28
+ 800ff1c:	789b      	ldrb	r3, [r3, #2]
+ 800ff1e:	76bb      	strb	r3, [r7, #26]
 			data[7]=rateArray[3];
- 800ff24:	6abb      	ldr	r3, [r7, #40]	@ 0x28
- 800ff26:	78db      	ldrb	r3, [r3, #3]
- 800ff28:	76fb      	strb	r3, [r7, #27]
+ 800ff20:	6abb      	ldr	r3, [r7, #40]	@ 0x28
+ 800ff22:	78db      	ldrb	r3, [r3, #3]
+ 800ff24:	76fb      	strb	r3, [r7, #27]
 			data[8]=volumeArray[0];
- 800ff2a:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
- 800ff2c:	781b      	ldrb	r3, [r3, #0]
- 800ff2e:	773b      	strb	r3, [r7, #28]
+ 800ff26:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
+ 800ff28:	781b      	ldrb	r3, [r3, #0]
+ 800ff2a:	773b      	strb	r3, [r7, #28]
 			data[9]=volumeArray[1];
- 800ff30:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
- 800ff32:	785b      	ldrb	r3, [r3, #1]
- 800ff34:	777b      	strb	r3, [r7, #29]
+ 800ff2c:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
+ 800ff2e:	785b      	ldrb	r3, [r3, #1]
+ 800ff30:	777b      	strb	r3, [r7, #29]
 			data[10]=volumeArray[2];
- 800ff36:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
- 800ff38:	789b      	ldrb	r3, [r3, #2]
- 800ff3a:	77bb      	strb	r3, [r7, #30]
+ 800ff32:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
+ 800ff34:	789b      	ldrb	r3, [r3, #2]
+ 800ff36:	77bb      	strb	r3, [r7, #30]
 			data[11]=volumeArray[3];
- 800ff3c:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
- 800ff3e:	78db      	ldrb	r3, [r3, #3]
- 800ff40:	77fb      	strb	r3, [r7, #31]
+ 800ff38:	6a7b      	ldr	r3, [r7, #36]	@ 0x24
+ 800ff3a:	78db      	ldrb	r3, [r3, #3]
+ 800ff3c:	77fb      	strb	r3, [r7, #31]
 			SuccessDataResult(0, SuccessDataType::SD_Volume, data, 12);
- 800ff42:	f107 0214 	add.w	r2, r7, #20
- 800ff46:	230c      	movs	r3, #12
- 800ff48:	2104      	movs	r1, #4
- 800ff4a:	2000      	movs	r0, #0
- 800ff4c:	f7fe fefa 	bl	800ed44 <SuccessDataResult>
+ 800ff3e:	f107 0214 	add.w	r2, r7, #20
+ 800ff42:	230c      	movs	r3, #12
+ 800ff44:	2104      	movs	r1, #4
+ 800ff46:	2000      	movs	r0, #0
+ 800ff48:	f7fe fefc 	bl	800ed44 <SuccessDataResult>
 			osSemaphoreRelease(ThreadStorage.VolumeSemaphoreHandle);
- 800ff50:	4b07      	ldr	r3, [pc, #28]	@ (800ff70 <StartReadVolumeTask+0xf8>)
- 800ff52:	f8d3 31dc 	ldr.w	r3, [r3, #476]	@ 0x1dc
- 800ff56:	4618      	mov	r0, r3
- 800ff58:	f7f6 fe70 	bl	8006c3c <osSemaphoreRelease>
+ 800ff4c:	4b07      	ldr	r3, [pc, #28]	@ (800ff6c <StartReadVolumeTask+0xf4>)
+ 800ff4e:	f8d3 31dc 	ldr.w	r3, [r3, #476]	@ 0x1dc
+ 800ff52:	4618      	mov	r0, r3
+ 800ff54:	f7f6 fe72 	bl	8006c3c <osSemaphoreRelease>
 		}
 		vTaskDelay( xDelay );
- 800ff5c:	6b78      	ldr	r0, [r7, #52]	@ 0x34
- 800ff5e:	f7f8 fa5f 	bl	8008420 <vTaskDelay>
+ 800ff58:	6b78      	ldr	r0, [r7, #52]	@ 0x34
+ 800ff5a:	f7f8 fa61 	bl	8008420 <vTaskDelay>
 	}
- 800ff62:	e7b8      	b.n	800fed6 <StartReadVolumeTask+0x5e>
- 800ff64:	200070c8 	.word	0x200070c8
- 800ff68:	2000932c 	.word	0x2000932c
- 800ff6c:	08011d7c 	.word	0x08011d7c
- 800ff70:	2000913c 	.word	0x2000913c
+ 800ff5e:	e7ba      	b.n	800fed6 <StartReadVolumeTask+0x5e>
+ 800ff60:	200070c8 	.word	0x200070c8
+ 800ff64:	2000932c 	.word	0x2000932c
+ 800ff68:	08011d7c 	.word	0x08011d7c
+ 800ff6c:	2000913c 	.word	0x2000913c
+ 800ff70:	200093a8 	.word	0x200093a8
 
 0800ff74 <StartAutoClosePumpTask>:
   * @param  argument: Not used

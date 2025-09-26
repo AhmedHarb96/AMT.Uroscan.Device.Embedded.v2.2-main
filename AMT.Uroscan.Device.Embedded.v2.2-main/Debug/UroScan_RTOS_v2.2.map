@@ -3929,7 +3929,7 @@ LOAD C:/ST/STM32CubeIDE_1.15.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_aranges
                 0x00001ca8      0x168 ./User/Src/SystemAdapter.o
 
-.debug_line     0x00000000    0x1a895
+.debug_line     0x00000000    0x1a899
  .debug_line    0x00000000      0x216 ./Core/Src/freertos.o
  .debug_line    0x00000216      0x662 ./Core/Src/main.o
  .debug_line    0x00000878      0x5f9 ./Core/Src/stm32f4xx_hal_msp.o
@@ -3961,7 +3961,7 @@ LOAD C:/ST/STM32CubeIDE_1.15.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_line    0x0001680c      0x7dc ./User/Src/Filter.o
  .debug_line    0x00016fe8     0x112d ./User/Src/FlashManager.o
  .debug_line    0x00018115      0xec8 ./User/Src/LoadCell.o
- .debug_line    0x00018fdd     0x18b8 ./User/Src/SystemAdapter.o
+ .debug_line    0x00018fdd     0x18bc ./User/Src/SystemAdapter.o
 
 .debug_str      0x00000000     0xbcb4
  .debug_str     0x00000000     0xbcb4 ./Core/Src/freertos.o
