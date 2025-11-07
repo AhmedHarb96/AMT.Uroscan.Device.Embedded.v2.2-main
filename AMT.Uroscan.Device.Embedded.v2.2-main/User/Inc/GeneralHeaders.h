@@ -161,6 +161,7 @@ enum CommandRequestType{
 	CMDR_StartManTest=0x1B,
 	CMDR_CleanDone=0x1C,
 
+	CMDR_MechanicalError=0xFE,
 	CMDR_StopTest=0xFD,
 	CMDR_StartTest=0xFF
 };
@@ -252,8 +253,8 @@ typedef struct {
 	uint8_t SecondEmgPerSecond=40;
 	uint8_t VolumePerSecond=10;
 	uint8_t FlowPerSecond=40;
-	uint8_t PumpMaxRunSecond=30;
-	uint8_t ValveMaxRunSecond=30;
+	uint8_t PumpMaxRunSecond=50; //30
+	uint8_t ValveMaxRunSecond=50; //30
 	uint16_t FirstEmgMaxTrim=7500;
 	uint16_t FirstEmgZeroMaxTrim=12500;
 	uint16_t FirstEmgZeroMinTrim=11000;

@@ -88,6 +88,7 @@ void Communication::System(uint8_t *command){
 bool isOpenFirstEmg;
 bool isOpenSecondEmg;
 bool isOpenLoadcell;
+bool startTestPMPTOflag;
 void Communication::Command(uint8_t *command){
 
 	uint16_t cleanTime=0;
@@ -262,6 +263,7 @@ void Communication::Command(uint8_t *command){
 			 cleanTime=(command[3]<<8)+command[4];
 			 SystemConfig.MinimumFlowSensiblity=command[5];
 			 SystemConfig.WaitAfterProcessSeconds=command[6];
+
 			StartTest(isOpenFirstEmg, isOpenSecondEmg, isOpenLoadcell,cleanTime,command[7]);
 			 break;
 
@@ -482,9 +484,18 @@ void Communication::ToggleReadSecondEmg(bool isStart){
 	osThreadTerminate(ThreadStorage.ReadSecondEmgThreadId);
 	ThreadStorage.ReadSecondEmgThreadId=NULL;
 }
+/////////////////////////////////// PUMP TIMEOUT ////////////////////////////////////////
+// helpers
+static inline void pump_on()  { HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_SET);   }
+static inline void pump_off() { HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_RESET); }
+
+// signed-tick compare (safe across 32-bit wrap)
+static inline bool time_reached(uint32_t now, uint32_t deadline) {
+    return ((int32_t)(now - deadline)) >= 0;
+}
 
 void Communication::TogglePump(bool isStart){
-	Statuses.Pump=isStart;
+	/*Statuses.Pump=isStart;
 	if(isStart){
 		if(ThreadStorage.PumpMaxRunThreadId!=NULL) return;
 		HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_SET);
@@ -494,9 +505,70 @@ void Communication::TogglePump(bool isStart){
 	HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_RESET);
 	osThreadTerminate(ThreadStorage.PumpMaxRunThreadId);
 	ThreadStorage.PumpMaxRunThreadId=NULL;
+*/
+	// Optional tiny critical section if TogglePump can be called from different contexts
+	 uint32_t primask = __get_PRIMASK();
+	    __disable_irq();
 
+	    if (isStart) {
+	        // Start or refresh
+	        if (!pump_running) {
+	            pump_on();
+	            Statuses.Pump = true;
+	            pump_running  = true;
+	        }
+
+	        const uint32_t secs = SystemConfig.PumpMaxRunSecond;   // user-configured
+	        if (secs == 0) {
+	            pump_deadline_ms = 0;  // “no timeout” → will run until explicit stop
+	        } else {
+	            uint32_t now = HAL_GetTick();
+	            uint32_t add = secs * 1000u;
+	            if (UINT32_MAX - now < add) add = UINT32_MAX - now;  // saturate
+	            pump_deadline_ms = now + add;
+	        }
+
+	        __set_PRIMASK(primask);
+	        return;
+	    }
+
+	    // Stop
+	    pump_off();
+	    Statuses.Pump     = false;
+	    pump_running      = false;
+	    pump_deadline_ms  = 0;
+
+	    __set_PRIMASK(primask);
 }
+void Communication::PumpService(void) {              // called in CMD_Rx_Task every 50ms!
+	if (!pump_running)      return;
+	if (pump_deadline_ms==0) return;  // timeout disabled
 
+	uint32_t now = HAL_GetTick();
+	if (time_reached(now, pump_deadline_ms)) {
+		// timeout → stop safely
+		pump_off();
+		Statuses.Pump     = false;
+		pump_running      = false;
+		pump_deadline_ms  = 0;
+		// if you used ThreadStorage.PumpMaxRunThreadId as a “running flag”, clear it here:
+		ThreadStorage.PumpMaxRunThreadId = nullptr;
+
+
+		if(startTestPMPTOflag){  //Mechanical Error After Test
+			startTestPMPTOflag=0;
+			SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_MechanicalError, ProcessStatuses::PS_End); //Send err code
+			osDelay(1000);
+			SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_StopTest, ProcessStatuses::PS_End);  //Finalize the test
+		}
+		else{					 //Mechanical Error Before Test
+			SendFeedback(RequestType::R_Command, CommandRequestType::CMDR_MechanicalError, ProcessStatuses::PS_End); //Send err code
+		}
+		osDelay(10000);
+		HAL_NVIC_SystemReset();
+	}
+}
+//////////////////////////////////////////////////////////////////////////////////
 void Communication::ToggleValve(bool isStart){
 	Statuses.Valve=isStart;
 	if(isStart){
@@ -532,6 +604,7 @@ void Communication::StartTest(bool isStartFirstEmg,bool isStartSecondEmg,bool is
 	ToggleSecondEmg(isStartSecondEmg);
 	ToggleLoadCell(isStartLoadcell);
 	SystemConfig.StartHandleSeconds=startHandleSeconds;
+	startTestPMPTOflag=true;
 	ToggleDataStream(true);
 	SystemConfig.PocketIndex=0;
 	SystemConfig.systemMode=SystemModes::TestMode;

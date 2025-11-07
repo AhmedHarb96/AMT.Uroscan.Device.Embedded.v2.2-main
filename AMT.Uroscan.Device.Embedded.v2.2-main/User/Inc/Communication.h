@@ -20,6 +20,7 @@ public:
 	void ToggleSecondEmg(bool isStart);
 	void ToggleLoadCell(bool isStart);
 	void TogglePump(bool isStart);
+	void PumpService(void);            // call this periodically (e.g., every 10–50 ms)
 	void ConfigPump(uint16_t timeout);
 	void ToggleValve(bool isStart);
 	void ConfigValve(uint16_t timeout);
@@ -45,6 +46,8 @@ public:
 	void SetFlashManager(FlashManager flashManager);
 private:
 	FlashManager FMI;
+    volatile bool pump_running = false;
+    volatile uint32_t pump_deadline_ms = 0;   // 0 means “no timeout armed”
 };
 
 #endif /* SRC_COMMUNICATION_H_ */

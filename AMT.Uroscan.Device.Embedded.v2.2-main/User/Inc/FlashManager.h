@@ -69,7 +69,7 @@ private:
 			HAL_FLASH_Lock();
 		}
 	}
-	uint32_t FlashMemAddress=0x08020000;
+	uint32_t FlashMemAddress=0x08020000;  //0x08020000;
 	uint8_t  FlowRateAppendAddress=0;
 	uint8_t  VolumeRateAppendAddress=8;
 	uint8_t  FlowAverageAppendAddress=16;

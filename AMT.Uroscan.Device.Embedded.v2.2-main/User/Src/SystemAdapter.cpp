@@ -61,6 +61,7 @@ void SetupOS(void){
 	EmgInstance.SecondEmgSetup();
 	LoadCellInstance.Setup();
 	FlashInitialize();
+	//FlashManagerInstance.HardReset(true);
 	CommunicationInstance.SetFlashManager(FlashManagerInstance);
 	osKernelInitialize();
 }
@@ -240,6 +241,7 @@ void StartReadUARTTask(void *argument){
 				SuccessDataResult(100, SuccessDataType::SD_RepeatAgain, data, 8);
 	        }
 		//}
+		CommunicationInstance.PumpService(); //***Pump Timeout fn calling****//
 		vTaskDelay(xDelay);
 			/*if (retryStatus||HAL_UART_Receive(&huart1, CommandUart, 8,HAL_MAX_DELAY) == HAL_OK)   //100
 			{
@@ -447,6 +449,9 @@ void StartSendUARTTask(void *argument)
 		SystemConfig.PocketIndex++;
 	  }
 	  vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+
+	  CommunicationInstance.PumpService(); //***Pump Timeout fn calling****//
   }
   /* USER CODE END 5 */
 }
@@ -724,15 +729,18 @@ void StartReadVolumeTask(void *argument)
   * @retval None
   */
 /* USER CODE END Header_StartAutoClosePumpTask */
+uint32_t xDelayTst;
 void StartAutoClosePumpTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 	const TickType_t xDelay = (1000*SystemConfig.PumpMaxRunSecond) / portTICK_PERIOD_MS;
+	//xDelayTst=xDelay;
 	for(;;)
 	{
 		vTaskDelay( xDelay );
 		CommunicationInstance.TogglePump(false);
+
 	}
   /* USER CODE END 5 */
 }
@@ -889,6 +897,7 @@ void StartCleanTask(void *argument){
 	volatile uint8_t type=0;
 	LoadCellInstance.ClearSamples();
 	CommunicationInstance.TogglePump(true);
+
 	if(ThreadStorage.PumpMaxRunThreadId!=NULL&&ThreadStorage.PumpMaxRunThreadId!=0x00){
 		osThreadTerminate(ThreadStorage.PumpMaxRunThreadId);
 		ThreadStorage.PumpMaxRunThreadId=NULL;
